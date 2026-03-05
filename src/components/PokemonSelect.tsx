@@ -3,6 +3,9 @@ import { Search, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 import { EncounterOption } from '../types';
+import evolutionOverridesJson from '../data/evolution-overrides.json';
+
+const EVOLUTION_OVERRIDES = evolutionOverridesJson as unknown as Record<string, string[]>;
 
 export interface PokemonSelectProps {
   value: string;
@@ -88,8 +91,18 @@ export const fetchPokemonData = async (name: string): Promise<PokemonData | null
 export const fetchEvolutionLine = async (name: string): Promise<string[]> => {
   if (evolutionLineCache[name]) return evolutionLineCache[name];
 
+  // Check static overrides first (regional forms / Lazarus-specific evolutions)
+  const normalizedKey = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
+  if (EVOLUTION_OVERRIDES[normalizedKey]) {
+    const line = EVOLUTION_OVERRIDES[normalizedKey];
+    evolutionLineCache[name] = line;
+    evolutionLineCache[normalizedKey] = line;
+    line.forEach(p => { evolutionLineCache[p] = line; });
+    return line;
+  }
+
   try {
-    const formattedName = formatSpecialNames(name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'));
+    const formattedName = formatSpecialNames(normalizedKey);
     // 1. Get species data
     const speciesRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${formattedName}`);
     if (!speciesRes.ok) return [name];
@@ -117,7 +130,8 @@ export const fetchEvolutionLine = async (name: string): Promise<string[]> => {
     };
     extract(chainData.chain);
 
-    // 4. Cache for all in line
+    // 4. Cache for all in line (PokeAPI names) and the original input name
+    evolutionLineCache[name.toLowerCase()] = line;
     line.forEach(p => {
       evolutionLineCache[p] = line;
     });

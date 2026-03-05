@@ -1,0 +1,35 @@
+{
+  "alolan-grimer":       ["alolan-grimer",       "alolan-muk"],
+  "alolan-vulpix":       ["alolan-vulpix",        "alolan-ninetales"],
+  "alolan-sandshrew":    ["alolan-sandshrew",      "alolan-sandslash"],
+  "alolan-meowth":       ["alolan-meowth",         "alolan-persian"],
+  "alolan-raichu":       ["alolan-raichu"],
+
+  "galarian-meowth":     ["galarian-meowth",       "perrserker"],
+  "galarian-ponyta":     ["galarian-ponyta",        "galarian-rapidash"],
+  "galarian-zigzagoon":  ["galarian-zigzagoon",     "galarian-linoone",  "obstagoon"],
+  "galarian-linoone":    ["galarian-zigzagoon",     "galarian-linoone",  "obstagoon"],
+  "galarian-corsola":    ["galarian-corsola",       "cursola"],
+
+  "paldean-wooper":      ["paldean-wooper",         "clodsire"],
+
+  "hisuian-growlithe":   ["hisuian-growlithe",      "hisuian-arcanine"],
+  "hisuian-voltorb":     ["hisuian-voltorb",        "hisuian-electrode"],
+  "hisuian-zorua":       ["hisuian-zorua",          "hisuian-zoroark"],
+  "hisuian-sneasel":     ["hisuian-sneasel",        "sneasler"],
+  "hisuian-sliggoo":     ["hisuian-sliggoo",        "hisuian-goodra"],
+  "hisuian-braviary":    ["hisuian-braviary"],
+  "hisuian-electrode":   ["hisuian-voltorb",        "hisuian-electrode"],
+  "hisuian-arcanine":    ["hisuian-growlithe",      "hisuian-arcanine"],
+  "hisuian-zoroark":     ["hisuian-zorua",          "hisuian-zoroark"],
+  "sneasler":            ["hisuian-sneasel",        "sneasler"],
+  "hisuian-goodra":      ["hisuian-sliggoo",        "hisuian-goodra"],
+
+  "rowlet":              ["rowlet",    "dartrix",   "hisuian-decidueye"],
+  "dartrix":             ["rowlet",    "dartrix",   "hisuian-decidueye"],
+  "hisuian-decidueye":   ["rowlet",    "dartrix",   "hisuian-decidueye"],
+
+  "cyndaquil":           ["cyndaquil", "quilava",   "hisuian-typhlosion"],
+  "quilava":             ["cyndaquil", "quilava",   "hisuian-typhlosion"],
+  "hisuian-typhlosion":  ["cyndaquil", "quilava",   "hisuian-typhlosion"]
+}

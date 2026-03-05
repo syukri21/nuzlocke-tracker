@@ -4,7 +4,7 @@ import { useGameData } from './hooks/useGameData';
 import { Skull, Package, Gamepad2, Search, CheckCircle2, X, RotateCcw, FileDown, FileUp, Swords } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-import { PokemonSelect, spriteCache, pokemonDataCache, fetchPokemonData, evolutionLineCache, fetchEvolutionLine } from './components/PokemonSelect';
+import { PokemonSelect, spriteCache, pokemonDataCache, fetchPokemonData, evolutionLineCache, fetchEvolutionLine, formatSpecialNames } from './components/PokemonSelect';
 import { initPokemonCache } from './lib/initPokemonCache';
 import { TypeIcon } from './components/TypeIcon';
 import { Pokeball } from './components/Pokeball';
@@ -110,7 +110,12 @@ export default function App() {
     if (!line) line = await fetchEvolutionLine(enc.pokemonName);
     if (line.length <= 1) return;
 
-    const currentIndex = line.indexOf(enc.pokemonName.toLowerCase());
+    const normalizedCurrent = enc.pokemonName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
+    const formattedCurrent = formatSpecialNames(normalizedCurrent);
+    const currentIndex =
+      line.indexOf(formattedCurrent) !== -1   ? line.indexOf(formattedCurrent) :
+      line.indexOf(normalizedCurrent) !== -1   ? line.indexOf(normalizedCurrent) :
+      line.indexOf(enc.pokemonName.toLowerCase());
     const nextPokemon = line[(currentIndex + 1) % line.length];
     await fetchPokemonData(nextPokemon);
     updateEncounter(locName, { pokemonName: nextPokemon });
@@ -128,7 +133,12 @@ export default function App() {
       let line = evolutionLineCache[enc.pokemonName.toLowerCase()];
       if (!line) line = await fetchEvolutionLine(enc.pokemonName);
       if (line.length > 1) {
-        const idx = line.indexOf(enc.pokemonName.toLowerCase());
+        const normalizedCurrent = enc.pokemonName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
+        const formattedCurrent = formatSpecialNames(normalizedCurrent);
+        const idx =
+          line.indexOf(formattedCurrent) !== -1   ? line.indexOf(formattedCurrent) :
+          line.indexOf(normalizedCurrent) !== -1   ? line.indexOf(normalizedCurrent) :
+          line.indexOf(enc.pokemonName.toLowerCase());
         nextPokemonName = line[(idx + 1) % line.length];
       }
     } catch { /* no evolution */ }
