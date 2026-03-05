@@ -341,23 +341,24 @@ function CoverageMatrix({ members }: { members: PartyMember[] }) {
   return (
     <div className="bg-[#212121] rounded-2xl border border-white/5 overflow-hidden">
       {/* Column headers: party sprites */}
-      <div className="flex items-center gap-1 px-3 py-2.5 border-b border-white/5 bg-black/20">
-        <div className="w-[88px] flex-shrink-0" />
+      <div className="flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-2.5 border-b border-white/5 bg-black/20">
+        {/* Type col spacer */}
+        <div className="w-6 sm:w-[88px] flex-shrink-0" />
         {Array.from({ length: 6 }).map((_, i) => {
           const m = members[i];
           const sprite = m ? spriteCache[m.enc.pokemonName?.toLowerCase() ?? ''] : undefined;
           return (
-            <div key={i} className="w-7 h-7 flex-shrink-0 flex items-center justify-center">
+            <div key={i} className="w-6 h-6 sm:w-7 sm:h-7 flex-shrink-0 flex items-center justify-center">
               {sprite
-                ? <img src={sprite} alt="" className="w-7 h-7 object-contain" />
+                ? <img src={sprite} alt="" className="w-6 h-6 sm:w-7 sm:h-7 object-contain" />
                 : m
-                  ? <span className="text-[7px] text-gray-600 font-bold">{cap(m.enc.pokemonName)?.substring(0, 3)}</span>
-                  : <span className="w-5 h-5 rounded border border-dashed border-white/8 block" />
+                  ? <span className="text-[6px] sm:text-[7px] text-gray-600 font-bold">{cap(m.enc.pokemonName)?.substring(0, 3)}</span>
+                  : <span className="w-4 h-4 sm:w-5 sm:h-5 rounded border border-dashed border-white/8 block" />
               }
             </div>
           );
         })}
-        <div className="w-12 flex-shrink-0" />
+        <div className="hidden sm:block w-12 flex-shrink-0" />
       </div>
 
       {/* Type rows */}
@@ -371,27 +372,29 @@ function CoverageMatrix({ members }: { members: PartyMember[] }) {
             <div
               key={type}
               className={cn(
-                'flex items-center gap-1 px-3 py-1.5',
+                'flex items-center gap-0.5 sm:gap-1 px-2 sm:px-3 py-1',
                 isWeak ? (has4x ? 'bg-red-500/5' : 'bg-orange-500/5') : ''
               )}
             >
-              <div className="w-[88px] flex-shrink-0">
-                <TypeIcon type={type} size="sm" label />
+              {/* Type label: icon-only on xs, full badge on sm+ */}
+              <div className="w-6 sm:w-[88px] flex-shrink-0">
+                <span className="block sm:hidden"><TypeIcon type={type} size="sm" label={false} /></span>
+                <span className="hidden sm:block"><TypeIcon type={type} size="sm" label /></span>
               </div>
               {Array.from({ length: 6 }).map((_, i) => {
                 const rel: Relation = relations[i] ?? 'empty';
                 return (
                   <div
                     key={i}
-                    className={cn('w-7 h-7 flex-shrink-0 rounded-lg flex items-center justify-center', RELATION_COLOR[rel])}
+                    className={cn('w-6 h-6 sm:w-7 sm:h-7 flex-shrink-0 rounded-md sm:rounded-lg flex items-center justify-center', RELATION_COLOR[rel])}
                   >
                     {rel !== 'neutral' && rel !== 'empty' && (
-                      <span className="text-[7px] font-black text-white/90 leading-none">{RELATION_LABEL[rel]}</span>
+                      <span className="text-[6px] sm:text-[7px] font-black text-white/90 leading-none">{RELATION_LABEL[rel]}</span>
                     )}
                   </div>
                 );
               })}
-              <div className="w-12 flex-shrink-0 text-right">
+              <div className="hidden sm:block w-12 flex-shrink-0 text-right">
                 {isWeak ? (
                   <span className={cn('text-[9px] font-black', has4x ? 'text-red-400' : 'text-orange-400')}>
                     {weak > 1 ? `${weak} weak` : 'weak'}
@@ -408,7 +411,7 @@ function CoverageMatrix({ members }: { members: PartyMember[] }) {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-3 flex-wrap px-3 py-2.5 border-t border-white/5 bg-black/20">
+      <div className="flex items-center gap-2 sm:gap-3 flex-wrap px-2 sm:px-3 py-2.5 border-t border-white/5 bg-black/20">
         {([
           ['superWeak', '4× weak'], ['weak', '2× weak'],
           ['resist', '½ resist'],   ['superResist', '¼ resist'], ['immune', 'immune'],
