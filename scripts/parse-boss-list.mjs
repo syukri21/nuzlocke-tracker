@@ -80,7 +80,7 @@ for (let t = 0; t < trainerCols.length; t++) {
     const heldItem = (!rawHeld || rawHeld === '-') ? null : rawHeld;
     const ability = abilityRow[col]?.trim() || null;
     const poolType = poolTypeRow[col]?.trim();
-    const isAce = poolType === '1';
+    const isLead = poolType === '1';
 
     const moves = [
       moves1Row[col]?.trim(),
@@ -89,8 +89,11 @@ for (let t = 0; t < trainerCols.length; t++) {
       moves4Row[col]?.trim(),
     ].filter(m => m && m !== '-');
 
-    pokemon.push({ name: pokemonName, level, heldItem, ability, moves, isAce });
+    pokemon.push({ name: pokemonName, level, heldItem, ability, moves, isLead, isAce: false });
   }
+
+  // Mark the last Pokemon as the ace
+  if (pokemon.length > 0) pokemon[pokemon.length - 1].isAce = true;
 
   bosses.push({ name, location, levelCap, trainerType, items, pokemon });
 }

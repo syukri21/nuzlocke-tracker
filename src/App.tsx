@@ -678,12 +678,15 @@ export default function App() {
                                   ) : (
                                     <span className="text-[9px] font-bold text-gray-600">{p.name.substring(0, 3)}</span>
                                   )}
-                                  {p.isAce && (
-                                    <span className="absolute -top-1 -right-1 text-yellow-400 text-[8px]">★</span>
-                                  )}
                                 </div>
                                 <span className="text-[8px] text-gray-400 text-center leading-tight max-w-[48px] truncate">{p.name}</span>
                                 <span className="text-[8px] text-gray-600">Lv {p.level}</span>
+                                {p.isLead && (
+                                  <span className="text-[7px] font-bold text-blue-400/80 uppercase tracking-wide">lead</span>
+                                )}
+                                {p.isAce && (
+                                  <span className="text-[7px] font-bold text-yellow-400/90 uppercase tracking-wide">ace</span>
+                                )}
                                 {p.heldItem && (
                                   <span className="text-[7px] text-orange-400/80 text-center leading-tight max-w-[48px] truncate">{p.heldItem}</span>
                                 )}
