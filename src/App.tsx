@@ -375,23 +375,35 @@ export default function App() {
     setTimeout(() => handleEvolve(locName), 1000);
     setTimeout(() => setEvolvingLocation(null), 2400);
 
-    // Fetch cry URL from PokeAPI and play (fire-and-forget)
+    // Create AudioContext synchronously inside the click handler so Android
+    // Chrome keeps the user-gesture unlock even after awaits below.
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    const audioCtx: AudioContext = new AudioCtx();
+
+    // Fetch cry URL then stream-decode via AudioContext (works on Android Chrome)
     try {
       const { formatSpecialNames } = await import('./components/PokemonSelect');
       const formattedName = formatSpecialNames(
         enc.pokemonName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-')
       );
-      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${formattedName}`);
-      if (res.ok) {
-        const data = await res.json();
+      const apiRes = await fetch(`https://pokeapi.co/api/v2/pokemon/${formattedName}`);
+      if (apiRes.ok) {
+        const data = await apiRes.json();
         const cryUrl = data.cries?.latest || data.cries?.legacy;
         if (cryUrl) {
-          const audio = new Audio(cryUrl);
-          audio.volume = 0.6;
-          audio.play().catch(() => {});
+          const cryRes = await fetch(cryUrl);
+          const arrayBuffer = await cryRes.arrayBuffer();
+          const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+          const source = audioCtx.createBufferSource();
+          const gainNode = audioCtx.createGain();
+          gainNode.gain.value = 0.6;
+          source.buffer = audioBuffer;
+          source.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+          source.start();
         }
       }
-    } catch { /* cry is optional, swallow errors */ }
+    } catch { /* cry is optional */ }
   };
 
   const openPokemonDetail = useCallback(async (locName: string) => {
