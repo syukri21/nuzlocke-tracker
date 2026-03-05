@@ -4,13 +4,16 @@ import tailwindcss from '@tailwindcss/vite'
 import path from 'path'
 import { VitePWA } from 'vite-plugin-pwa'
 
+const base = process.env.BASE_URL ?? '/';
+
 export default defineConfig({
-  base: process.env.BASE_URL || '/',
+  base,
   plugins: [
     react(),
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      base,
       includeAssets: ['icon.svg', 'type-icons/*.svg'],
       manifest: {
         name: 'Pokémon Lazarus Nuzlocke Tracker',
@@ -20,8 +23,8 @@ export default defineConfig({
         background_color: '#111111',
         display: 'standalone',
         orientation: 'portrait',
-        start_url: '/',
-        scope: '/',
+        start_url: base,
+        scope: base,
         icons: [
           {
             src: '/icon.svg',
