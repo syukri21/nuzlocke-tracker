@@ -268,7 +268,7 @@ function GraveyardCard({ locName, enc, sprite }: {
           <div className={cn("font-bold truncate transition-colors duration-[2000ms]", enc.nickname ? "text-xs text-gray-600" : "text-sm text-gray-400")}>
             {enc.pokemonName}
           </div>
-          <div className="text-[10px] text-gray-700 mt-0.5 truncate">Fell at {locName}</div>
+          <div className="text-[10px] text-gray-700 mt-0.5 truncate">First met at {locName}</div>
           {tribute && (
             <div className="text-[9px] text-blue-400/40 mt-1 font-medium">Remembered forever</div>
           )}
