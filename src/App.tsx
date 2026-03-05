@@ -4,7 +4,7 @@ import { useRunStore } from './hooks/useRunStore';
 import locationsData from './data/locations.json';
 import bossesData from './data/bosses.json';
 import moveTypes from './data/move-types.json';
-import { Skull, Package, Gamepad2, Search, Settings, Sun, ChevronRight, CheckCircle2, CircleSlash, Copy, Gift, Sparkles, Pencil, X, Ruler, Weight } from 'lucide-react';
+import { Skull, Package, Gamepad2, Search, Settings, Sun, ChevronRight, CheckCircle2, CircleSlash, Copy, Gift, Sparkles, Pencil, X, Ruler, Weight, RotateCcw } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
 import { PokemonSelect, fetchSpriteForName, spriteCache, pokemonDataCache, fetchPokemonData, evolutionLineCache, fetchEvolutionLine } from './components/PokemonSelect';
@@ -281,13 +281,14 @@ function GraveyardCard({ locName, enc, sprite }: {
 }
 
 export default function App() {
-  const { state, updateEncounter, markFainted } = useRunStore();
+  const { state, updateEncounter, markFainted, resetRun } = useRunStore();
   const [activeMainTab, setActiveMainTab] = useState<'Game' | 'Box' | 'Grave'>('Game');
   const [activeSubTab, setActiveSubTab] = useState<'Nuzlocke' | 'Routes' | 'Bosses' | 'Upcoming'>('Nuzlocke');
   const [searchTerm, setSearchTerm] = useState('');
   const [editingLocations, setEditingLocations] = useState<Set<string>>(new Set());
   const [navVisible, setNavVisible] = useState(true);
   const lastScrollY = useRef(0);
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [detailPokemon, setDetailPokemon] = useState<DetailData | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [cacheReady, setCacheReady] = useState(false);
@@ -814,8 +815,45 @@ export default function App() {
           </div>
           <div className="flex items-center gap-2">
             <button className="p-2 hover:bg-white/10 rounded-full transition-colors"><Sun className="h-4 w-4 text-gray-400" /></button>
+            <button
+              onClick={() => setShowResetConfirm(true)}
+              className="p-2 hover:bg-red-500/10 rounded-full transition-colors"
+              title="Reset run"
+            >
+              <RotateCcw className="h-4 w-4 text-gray-500 hover:text-red-400 transition-colors" />
+            </button>
           </div>
         </header>
+
+        {/* Reset Confirmation Dialog */}
+        {showResetConfirm && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center px-6">
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowResetConfirm(false)} />
+            <div className="relative bg-[#1e1e1e] rounded-2xl border border-white/10 p-6 w-full max-w-[320px] shadow-2xl">
+              <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-500/10 mx-auto mb-4">
+                <RotateCcw className="h-6 w-6 text-red-400" />
+              </div>
+              <h2 className="text-base font-black text-white text-center mb-2">Reset Run?</h2>
+              <p className="text-xs text-gray-400 text-center mb-6 leading-relaxed">
+                This will permanently delete all your encounter data, boxed Pokémon, and graveyard. This cannot be undone.
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => setShowResetConfirm(false)}
+                  className="py-2.5 rounded-xl bg-white/5 border border-white/10 text-sm font-bold text-gray-300 hover:bg-white/10 transition-colors cursor-pointer"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => { resetRun(); setShowResetConfirm(false); }}
+                  className="py-2.5 rounded-xl bg-red-500/20 border border-red-500/30 text-sm font-bold text-red-400 hover:bg-red-500/30 transition-colors cursor-pointer"
+                >
+                  Reset
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Content Area */}
         <main className="px-4 py-6">

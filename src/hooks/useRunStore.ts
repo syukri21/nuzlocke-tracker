@@ -97,11 +97,17 @@ export function useRunStore() {
     updateEncounter(locationName, { status: 'Fainted', causeOfDeath: cause, killer, isPartyMember: false });
   };
 
+  const resetRun = () => {
+    localStorage.removeItem('lazarus_nuzlocke_run');
+    setState(INITIAL_STATE);
+  };
+
   return {
     state,
     updateEncounter,
     moveToParty,
     moveToBox,
-    markFainted
+    markFainted,
+    resetRun
   };
 }
