@@ -670,6 +670,9 @@ export default function App() {
               encounters={state.encounters}
               onMoveToParty={moveToParty}
               onMoveToBox={moveToBox}
+              onEvolve={handleEvolveWithEffect}
+              onMarkFainted={markFainted}
+              evolvingLocation={evolvingLocation}
             />
           )}
 

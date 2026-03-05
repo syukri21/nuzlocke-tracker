@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
-import { X } from 'lucide-react';
+import { X, Sparkles, Skull } from 'lucide-react';
 import { Encounter } from '../types';
 import { cap, getTypeMatchups, ALL_TYPES, TYPE_BG } from '../constants/gameConstants';
 import { TypeIcon } from './TypeIcon';
@@ -23,6 +23,9 @@ interface TeamBuilderProps {
   encounters: Record<string, Encounter>;
   onMoveToParty: (locName: string) => void;
   onMoveToBox: (locName: string) => void;
+  onEvolve: (locName: string) => void;
+  onMarkFainted: (locName: string) => void;
+  evolvingLocation: string | null;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -209,7 +212,13 @@ function EmptySlot({ onClick }: { onClick: () => void }) {
 
 // ── Member card ───────────────────────────────────────────────────────────────
 
-function MemberCard({ member, onRemove }: { member: PartyMember; onRemove: () => void }) {
+function MemberCard({ member, onRemove, onEvolve, onMarkFainted, isEvolving }: {
+  member: PartyMember;
+  onRemove: () => void;
+  onEvolve: () => void;
+  onMarkFainted: () => void;
+  isEvolving: boolean;
+}) {
   const { enc, locName } = member;
   const data   = pokemonDataCache[enc.pokemonName?.toLowerCase() ?? ''];
   const sprite = enc.pokemonName ? spriteCache[enc.pokemonName.toLowerCase()] : undefined;
@@ -230,11 +239,16 @@ function MemberCard({ member, onRemove }: { member: PartyMember; onRemove: () =>
         <X className="w-2.5 h-2.5 text-gray-500 hover:text-red-400" />
       </button>
 
+      {/* Evolution flash overlay */}
+      {isEvolving && (
+        <div className="absolute inset-0 z-30 pointer-events-none evolution-overlay rounded-2xl" />
+      )}
+
       {/* Sprite + name */}
       <div className="flex items-center gap-2 mb-2.5">
         <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center">
           {sprite
-            ? <img src={sprite} alt={enc.pokemonName} className="w-14 h-14 object-contain drop-shadow-lg" />
+            ? <img src={sprite} alt={enc.pokemonName} className={cn('w-14 h-14 object-contain drop-shadow-lg', isEvolving && 'sprite-evolving')} />
             : <div className="w-12 h-12 rounded-full bg-black/30 animate-pulse" />
           }
         </div>
@@ -272,7 +286,25 @@ function MemberCard({ member, onRemove }: { member: PartyMember; onRemove: () =>
         </div>
       )}
 
-      <div className="text-[7px] text-gray-700 truncate mt-1">{locName}</div>
+      <div className="text-[7px] text-gray-700 truncate mt-1 mb-2">{locName}</div>
+
+      {/* Action buttons */}
+      <div className="grid grid-cols-2 gap-1.5">
+        <button
+          onClick={onEvolve}
+          className="flex items-center justify-center gap-1 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-cyan-400 transition-all cursor-pointer active:scale-95"
+        >
+          <Sparkles className="h-3 w-3" />
+          <span className="text-[8px] font-bold">Evolve</span>
+        </button>
+        <button
+          onClick={onMarkFainted}
+          className="flex items-center justify-center gap-1 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/25 text-red-400 transition-all cursor-pointer active:scale-95"
+        >
+          <Skull className="h-3 w-3" />
+          <span className="text-[8px] font-bold">Dead</span>
+        </button>
+      </div>
     </div>
   );
 }
@@ -393,7 +425,7 @@ function CoverageMatrix({ members }: { members: PartyMember[] }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function TeamBuilder({ partyLocations, boxLocations, encounters, onMoveToParty, onMoveToBox }: TeamBuilderProps) {
+export function TeamBuilder({ partyLocations, boxLocations, encounters, onMoveToParty, onMoveToBox, onEvolve, onMarkFainted, evolvingLocation }: TeamBuilderProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const members: PartyMember[] = partyLocations
@@ -414,7 +446,14 @@ export function TeamBuilder({ partyLocations, boxLocations, encounters, onMoveTo
       <div className="grid grid-cols-2 gap-3">
         {Array.from({ length: 6 }).map((_, i) =>
           members[i]
-            ? <MemberCard key={members[i].locName} member={members[i]} onRemove={() => onMoveToBox(members[i].locName)} />
+            ? <MemberCard
+                key={members[i].locName}
+                member={members[i]}
+                onRemove={() => onMoveToBox(members[i].locName)}
+                onEvolve={() => onEvolve(members[i].locName)}
+                onMarkFainted={() => onMarkFainted(members[i].locName)}
+                isEvolving={evolvingLocation === members[i].locName}
+              />
             : <EmptySlot key={`empty-${i}`} onClick={() => !partyFull && setPickerOpen(true)} />
         )}
       </div>
