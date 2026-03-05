@@ -1,10 +1,9 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useRunStore } from './hooks/useRunStore';
-import locationsData from './data/locations.json';
-import bossesData from './data/bosses.json';
+import { useGameData } from './hooks/useGameData';
 import moveTypes from './data/move-types.json';
-import { Skull, Package, Gamepad2, Search, Settings, Sun, ChevronRight, CheckCircle2, CircleSlash, Copy, Gift, Sparkles, Pencil, X, Ruler, Weight, RotateCcw } from 'lucide-react';
+import { Skull, Package, Gamepad2, Search, Sun, CheckCircle2, CircleSlash, Copy, Gift, Sparkles, X, Ruler, Weight, RotateCcw, FileDown, FileUp } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
 import { PokemonSelect, fetchSpriteForName, spriteCache, pokemonDataCache, fetchPokemonData, evolutionLineCache, fetchEvolutionLine } from './components/PokemonSelect';
@@ -282,6 +281,7 @@ function GraveyardCard({ locName, enc, sprite }: {
 
 export default function App() {
   const { state, updateEncounter, markFainted, resetRun } = useRunStore();
+  const { gameData, isCustom, importGameData, exportGameData, resetGameData } = useGameData();
   const [activeMainTab, setActiveMainTab] = useState<'Game' | 'Box' | 'Grave'>('Game');
   const [activeSubTab, setActiveSubTab] = useState<'Nuzlocke' | 'Routes' | 'Bosses' | 'Upcoming'>('Nuzlocke');
   const [searchTerm, setSearchTerm] = useState('');
@@ -289,6 +289,9 @@ export default function App() {
   const [navVisible, setNavVisible] = useState(true);
   const lastScrollY = useRef(0);
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [showDataManager, setShowDataManager] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
+  const [importSuccess, setImportSuccess] = useState(false);
   const [detailPokemon, setDetailPokemon] = useState<DetailData | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [cacheReady, setCacheReady] = useState(false);
@@ -302,7 +305,7 @@ export default function App() {
       setCacheReady(true);
       // Populate boss sprites from cache
       const newSprites: Record<string, string> = {};
-      bossesData.bosses.forEach(boss => {
+      gameData.bosses.forEach(boss => {
         boss.pokemon.forEach(p => {
           if (pokemonDataCache[p.name.toLowerCase()]?.sprite) newSprites[p.name] = pokemonDataCache[p.name.toLowerCase()].sprite;
         });
@@ -555,12 +558,30 @@ export default function App() {
     }
   }, []);
 
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        importGameData(ev.target?.result as string);
+        setImportError(null);
+        setImportSuccess(true);
+        setTimeout(() => { setImportSuccess(false); setShowDataManager(false); }, 1500);
+      } catch (err: any) {
+        setImportError(err.message || 'Failed to import');
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  };
+
   // Helper to capitalize first letter
   const cap = (s?: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
   const renderEncounterRow = (locName: string) => {
     const enc = state.encounters[locName] || { locationName: locName, status: 'None' };
-    const loc = locationsData.locations.find(l => l.name === locName);
+    const loc = gameData.locations.find(l => l.name === locName);
 
     const availablePokemonSet = new Map<string, { name: string, id: number }>();
     if (loc) {
@@ -814,7 +835,14 @@ export default function App() {
             <h1 className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Pokemon Lazarus...</h1>
           </div>
           <div className="flex items-center gap-2">
-            <button className="p-2 hover:bg-white/10 rounded-full transition-colors"><Sun className="h-4 w-4 text-gray-400" /></button>
+            <button
+              onClick={() => { setShowDataManager(true); setImportError(null); setImportSuccess(false); }}
+              className="p-2 hover:bg-white/10 rounded-full transition-colors relative"
+              title="Import / Export game data"
+            >
+              <FileDown className="h-4 w-4 text-gray-400" />
+              {isCustom && <span className="absolute top-1 right-1 w-1.5 h-1.5 bg-cyan-400 rounded-full" />}
+            </button>
             <button
               onClick={() => setShowResetConfirm(true)}
               className="p-2 hover:bg-red-500/10 rounded-full transition-colors"
@@ -851,6 +879,66 @@ export default function App() {
                   Reset
                 </button>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Data Manager Modal */}
+        {showDataManager && (
+          <div className="fixed inset-0 z-[300] flex items-center justify-center px-6">
+            <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={() => setShowDataManager(false)} />
+            <div className="relative bg-[#1e1e1e] rounded-2xl border border-white/10 p-6 w-full max-w-[320px] shadow-2xl">
+              <button
+                onClick={() => setShowDataManager(false)}
+                className="absolute top-4 right-4 p-1 rounded-full hover:bg-white/10 transition-colors"
+              >
+                <X className="h-4 w-4 text-gray-500" />
+              </button>
+
+              <div className="text-sm font-black text-white mb-1">Game Data</div>
+              <div className="text-[10px] text-gray-500 mb-5 leading-relaxed">
+                Download the default Lazarus game data, tweak it (locations, bosses, encounters), then re-upload to customise your tracker.
+                {isCustom && <span className="block mt-1 text-cyan-400">Custom data loaded.</span>}
+              </div>
+
+              {/* Export */}
+              <button
+                onClick={exportGameData}
+                className="w-full flex items-center gap-3 py-3 px-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors mb-3 cursor-pointer"
+              >
+                <FileDown className="h-4 w-4 text-cyan-400 flex-shrink-0" />
+                <div className="text-left">
+                  <div className="text-xs font-bold text-white">Download game data</div>
+                  <div className="text-[9px] text-gray-500">Save current data as JSON file</div>
+                </div>
+              </button>
+
+              {/* Import */}
+              <label className="w-full flex items-center gap-3 py-3 px-4 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors mb-3 cursor-pointer">
+                <FileUp className="h-4 w-4 text-green-400 flex-shrink-0" />
+                <div className="text-left">
+                  <div className="text-xs font-bold text-white">Upload game data</div>
+                  <div className="text-[9px] text-gray-500">Load a custom JSON file</div>
+                </div>
+                <input type="file" accept=".json,application/json" className="hidden" onChange={handleImportFile} />
+              </label>
+
+              {importSuccess && (
+                <div className="text-[10px] text-green-400 font-bold text-center mb-3">Imported successfully!</div>
+              )}
+              {importError && (
+                <div className="text-[10px] text-red-400 text-center mb-3 leading-snug">{importError}</div>
+              )}
+
+              {/* Reset to default */}
+              {isCustom && (
+                <button
+                  onClick={() => { resetGameData(); setShowDataManager(false); }}
+                  className="w-full py-2 text-[10px] font-bold text-gray-500 hover:text-red-400 transition-colors"
+                >
+                  Reset to default Lazarus data
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -901,7 +989,7 @@ export default function App() {
               {/* Nuzlocke Tab */}
               {activeSubTab === 'Nuzlocke' && (
                 <div className="space-y-4">
-                  {locationsData.locations
+                  {gameData.locations
                     .filter(loc => loc.name.toLowerCase().includes(searchTerm.toLowerCase()))
                     .map(loc => renderEncounterRow(loc.name))}
                 </div>
@@ -910,7 +998,7 @@ export default function App() {
               {/* Routes Tab */}
               {activeSubTab === 'Routes' && (
                 <div className="space-y-3">
-                  {locationsData.locations
+                  {gameData.locations
                     .filter(loc => {
                       const q = searchTerm.toLowerCase();
                       if (!q) return true;
@@ -949,7 +1037,7 @@ export default function App() {
               {/* Bosses Tab */}
               {activeSubTab === 'Bosses' && (
                 <div className="space-y-3">
-                  {bossesData.bosses
+                  {gameData.bosses
                     .filter(boss => {
                       const q = searchTerm.toLowerCase();
                       if (!q) return true;
@@ -1031,7 +1119,7 @@ export default function App() {
               {/* Upcoming Tab — locations not yet encountered */}
               {activeSubTab === 'Upcoming' && (
                 <div className="space-y-4">
-                  {locationsData.locations
+                  {gameData.locations
                     .filter(loc => {
                       const enc = state.encounters[loc.name];
                       const notDone = !enc || enc.status === 'None';
@@ -1039,7 +1127,7 @@ export default function App() {
                       return loc.name.toLowerCase().includes(searchTerm.toLowerCase());
                     })
                     .map(loc => renderEncounterRow(loc.name))}
-                  {locationsData.locations.filter(loc => {
+                  {gameData.locations.filter(loc => {
                     const enc = state.encounters[loc.name];
                     return (!enc || enc.status === 'None') && loc.name.toLowerCase().includes(searchTerm.toLowerCase());
                   }).length === 0 && (
