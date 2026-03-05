@@ -1,6 +1,6 @@
 import { pokemonDataCache, evolutionLineCache, spriteCache } from '../components/PokemonSelect';
 
-const LS_KEY = 'pokemon-cache-v1';
+const LS_KEY = 'pokemon-cache-v4';
 
 interface CacheEntry {
   sprite: string | null;
@@ -12,47 +12,36 @@ interface CacheEntry {
 
 type PokemonCacheData = Record<string, CacheEntry>;
 
-function populateMemoryCache(data: PokemonCacheData) {
+function loadIntoMemory(data: PokemonCacheData) {
   for (const [name, entry] of Object.entries(data)) {
-    if (!entry.sprite && !entry.officialArtwork) continue;
     const spriteUrl = entry.officialArtwork || entry.sprite || '';
-    pokemonDataCache[name] = {
-      sprite: spriteUrl,
-      stats: entry.stats,
-      types: entry.types,
-      evolutionLine: entry.evolutionLine,
-    };
-    if (spriteUrl) spriteCache[name] = spriteUrl;
-    // Populate evolution line cache for all members of the line
+    if (!spriteUrl) continue;
+    // Always store under lowercase key — lookups must use .toLowerCase()
+    const key = name.toLowerCase();
+    pokemonDataCache[key] = { sprite: spriteUrl, stats: entry.stats, types: entry.types, evolutionLine: entry.evolutionLine };
+    spriteCache[key] = spriteUrl;
     if (entry.evolutionLine?.length) {
-      entry.evolutionLine.forEach(p => {
-        evolutionLineCache[p] = entry.evolutionLine;
-      });
+      entry.evolutionLine.forEach(p => { evolutionLineCache[p] = entry.evolutionLine; });
     }
   }
 }
 
 export async function initPokemonCache(): Promise<void> {
-  // 1. Try localStorage first (fastest)
+  // 1. Try localStorage first (instant on repeat visits)
   try {
     const stored = localStorage.getItem(LS_KEY);
     if (stored) {
-      const data: PokemonCacheData = JSON.parse(stored);
-      populateMemoryCache(data);
+      loadIntoMemory(JSON.parse(stored));
       return;
     }
-  } catch {
-    // localStorage parse error — fall through to JSON import
-  }
+  } catch { /* fall through */ }
 
-  // 2. Load bundled JSON (first ever load)
+  // 2. First load — use bundled JSON
   const data: PokemonCacheData = (await import('../data/pokemon-cache.json')).default as PokemonCacheData;
-  populateMemoryCache(data);
+  loadIntoMemory(data);
 
-  // 3. Persist to localStorage for future loads
+  // 3. Persist to localStorage for future visits
   try {
     localStorage.setItem(LS_KEY, JSON.stringify(data));
-  } catch {
-    // localStorage quota exceeded — not fatal
-  }
+  } catch { /* quota exceeded */ }
 }

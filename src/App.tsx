@@ -82,22 +82,36 @@ export default function App() {
   // State to hold boss sprites once fetched
   const [bossSprites, setBossSprites] = useState<Record<string, string>>({});
 
-  // Initialize Pokemon cache from localStorage / bundled JSON on startup
+  // Initialize Pokemon cache from localStorage or bundled JSON on startup
   useEffect(() => {
     initPokemonCache().then(() => {
       setCacheReady(true);
-      // After cache is ready, populate boss sprites from cache (keys are lowercase)
+      // Populate boss sprites from cache
       const newSprites: Record<string, string> = {};
       bossesData.bosses.forEach(boss => {
         boss.keyPokemon.forEach(p => {
-          const cached = pokemonDataCache[p.toLowerCase()];
-          if (cached?.sprite) newSprites[p] = cached.sprite;
-          else newSprites[p] = pokemonDataCache[p]?.sprite || '';
+          if (pokemonDataCache[p.toLowerCase()]?.sprite) newSprites[p] = pokemonDataCache[p.toLowerCase()].sprite;
         });
       });
       setBossSprites(newSprites);
     });
   }, []);
+
+  // After cache is ready, fetch data for any boxed/graveyard Pokemon not in the bundled cache
+  // (e.g. evolutions like Jolteon that weren't in locations.json)
+  const [, forceUpdate] = useState(0);
+  useEffect(() => {
+    if (!cacheReady) return;
+    const missing = [...state.box, ...state.graveyard]
+      .map(loc => state.encounters[loc]?.pokemonName)
+      .filter((name): name is string => !!name && !pokemonDataCache[name.toLowerCase()]);
+
+    if (missing.length === 0) return;
+    const unique = [...new Set(missing)];
+    Promise.all(unique.map(name => fetchPokemonData(name))).then(() => {
+      forceUpdate(n => n + 1);
+    });
+  }, [cacheReady, state.box, state.graveyard]);
 
   const toggleEditing = (locName: string) => {
     setEditingLocations(prev => {
@@ -123,7 +137,7 @@ export default function App() {
     if (!enc || !enc.pokemonName) return;
 
     // Use cached line or fetch it
-    let line = evolutionLineCache[enc.pokemonName];
+    let line = evolutionLineCache[enc.pokemonName.toLowerCase()];
     if (!line) {
       line = await fetchEvolutionLine(enc.pokemonName);
     }
@@ -180,7 +194,7 @@ export default function App() {
       });
     } catch (e) {
       // fallback to cached data
-      const cached = pokemonDataCache[state.encounters[locName]?.pokemonName || ''];
+      const cached = pokemonDataCache[(state.encounters[locName]?.pokemonName || '').toLowerCase()];
       if (cached) {
         setDetailPokemon({
           sprite: cached.sprite,
@@ -213,7 +227,7 @@ export default function App() {
     }
     const availablePokemon = Array.from(availablePokemonSet.values());
 
-    const selectedSprite = enc.pokemonName ? spriteCache[enc.pokemonName] : null;
+    const selectedSprite = enc.pokemonName ? spriteCache[enc.pokemonName.toLowerCase()] : null;
     const isCompleted = enc.status !== 'None' && enc.pokemonName;
     const isEditing = editingLocations.has(locName);
 
@@ -318,7 +332,7 @@ export default function App() {
     const enc = state.encounters[locName];
     if (!enc || !enc.pokemonName) return null;
 
-    const data = pokemonDataCache[enc.pokemonName];
+    const data = pokemonDataCache[enc.pokemonName.toLowerCase()];
     const topStats = data?.stats
       ? [...data.stats].sort((a, b) => b.value - a.value).slice(0, 3)
       : [];
@@ -410,10 +424,7 @@ export default function App() {
               <span className="text-red-500 text-xs font-black italic">P</span>
             </div>
           </div>
-          <div className="text-center">
-            <p className="text-sm font-bold text-white">Loading Pokédex data...</p>
-            <p className="text-[10px] text-gray-500 mt-1">This only happens once</p>
-          </div>
+          <p className="text-sm font-bold text-white">Loading Pokédex...</p>
         </div>
       </div>
     );

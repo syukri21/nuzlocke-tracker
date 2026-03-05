@@ -51,7 +51,8 @@ export const formatSpecialNames = (name: string) => {
 };
 
 export const fetchPokemonData = async (name: string): Promise<PokemonData | null> => {
-  if (pokemonDataCache[name]) return pokemonDataCache[name];
+  const key = name.toLowerCase();
+  if (pokemonDataCache[key]) return pokemonDataCache[key];
   try {
     const formattedName = formatSpecialNames(name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'));
     const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${formattedName}`);
@@ -72,8 +73,8 @@ export const fetchPokemonData = async (name: string): Promise<PokemonData | null
         }
 
         const pokemonData = { sprite: spriteUrl, stats, types, evolutionLine };
-        pokemonDataCache[name] = pokemonData;
-        spriteCache[name] = spriteUrl; // Sync legacy cache
+        pokemonDataCache[key] = pokemonData;
+        spriteCache[key] = spriteUrl;
         return pokemonData;
       }
     }
