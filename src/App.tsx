@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRunStore } from './hooks/useRunStore';
 import { useGameData } from './hooks/useGameData';
-import { Skull, Package, Gamepad2, Search, CheckCircle2, X, RotateCcw, FileDown, FileUp } from 'lucide-react';
+import { Skull, Package, Gamepad2, Search, CheckCircle2, X, RotateCcw, FileDown, FileUp, Swords } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 import { PokemonSelect, spriteCache, pokemonDataCache, fetchPokemonData, evolutionLineCache, fetchEvolutionLine } from './components/PokemonSelect';
@@ -11,6 +11,7 @@ import { GraveyardCard } from './components/GraveyardCard';
 import { EncounterRow } from './components/EncounterRow';
 import { BoxGridItem } from './components/BoxGridItem';
 import { DetailModal } from './components/DetailModal';
+import { TeamBuilder } from './components/TeamBuilder';
 import { STAT_NAME_MAP } from './constants/gameConstants';
 import { DetailData, Encounter } from './types';
 
@@ -20,7 +21,7 @@ export default function App() {
   const { state, updateEncounter, markFainted, resetRun } = useRunStore();
   const { gameData, isCustom, importGameData, exportGameData, resetGameData } = useGameData();
 
-  const [activeMainTab, setActiveMainTab] = useState<'Game' | 'Box' | 'Grave'>('Game');
+  const [activeMainTab, setActiveMainTab] = useState<'Game' | 'Team' | 'Box' | 'Grave'>('Game');
   const [activeSubTab, setActiveSubTab] = useState<'Nuzlocke' | 'Routes' | 'Bosses' | 'Upcoming'>('Nuzlocke');
   const [searchTerm, setSearchTerm] = useState('');
   const [editingLocations, setEditingLocations] = useState<Set<string>>(new Set());
@@ -646,6 +647,11 @@ export default function App() {
             </div>
           )}
 
+          {/* ── Team tab ────────────────────────────────────────────────────── */}
+          {activeMainTab === 'Team' && (
+            <TeamBuilder partyLocations={state.party} encounters={state.encounters} />
+          )}
+
           {/* ── Box tab ─────────────────────────────────────────────────────── */}
           {activeMainTab === 'Box' && (
             <div className="space-y-4">
@@ -726,6 +732,7 @@ export default function App() {
         )}>
           {([
             { tab: 'Game',  Icon: Gamepad2, label: 'Game'  },
+            { tab: 'Team',  Icon: Swords,   label: 'Team'  },
             { tab: 'Box',   Icon: Package,  label: 'Box'   },
             { tab: 'Grave', Icon: Skull,    label: 'Grave' },
           ] as const).map(({ tab, Icon, label }) => (
