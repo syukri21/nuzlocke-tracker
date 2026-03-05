@@ -682,6 +682,7 @@ export default function App() {
               onMoveToBox={moveToBox}
               onEvolve={handleEvolveWithEffect}
               onMarkFainted={markFainted}
+              onOpenDetail={openPokemonDetail}
               evolvingLocation={evolvingLocation}
             />
           )}

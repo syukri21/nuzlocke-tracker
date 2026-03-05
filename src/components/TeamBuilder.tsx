@@ -25,6 +25,7 @@ interface TeamBuilderProps {
   onMoveToBox: (locName: string) => void;
   onEvolve: (locName: string) => void;
   onMarkFainted: (locName: string) => void;
+  onOpenDetail: (locName: string) => void;
   evolvingLocation: string | null;
 }
 
@@ -212,11 +213,12 @@ function EmptySlot({ onClick }: { onClick: () => void }) {
 
 // ── Member card ───────────────────────────────────────────────────────────────
 
-function MemberCard({ member, onRemove, onEvolve, onMarkFainted, isEvolving }: {
+function MemberCard({ member, onRemove, onEvolve, onMarkFainted, onOpenDetail, isEvolving }: {
   member: PartyMember;
   onRemove: () => void;
   onEvolve: () => void;
   onMarkFainted: () => void;
+  onOpenDetail: () => void;
   isEvolving: boolean;
 }) {
   const { enc, locName } = member;
@@ -227,12 +229,13 @@ function MemberCard({ member, onRemove, onEvolve, onMarkFainted, isEvolving }: {
 
   return (
     <div
-      className="bg-[#212121] rounded-2xl border border-white/5 p-3 shadow-lg relative overflow-hidden"
+      className="bg-[#212121] rounded-2xl border border-white/5 p-3 shadow-lg relative overflow-hidden cursor-pointer active:scale-[0.98] transition-transform"
       style={{ backgroundColor: `color-mix(in srgb, ${bg} 30%, #212121)` }}
+      onClick={onOpenDetail}
     >
       {/* Remove button */}
       <button
-        onClick={onRemove}
+        onClick={(e) => { e.stopPropagation(); onRemove(); }}
         className="absolute top-2 right-2 w-5 h-5 rounded-full bg-white/5 hover:bg-red-500/20 flex items-center justify-center transition-colors z-10"
         title="Move to Box"
       >
@@ -289,7 +292,7 @@ function MemberCard({ member, onRemove, onEvolve, onMarkFainted, isEvolving }: {
       <div className="text-[7px] text-gray-700 truncate mt-1 mb-2">{locName}</div>
 
       {/* Action buttons */}
-      <div className="grid grid-cols-2 gap-1.5">
+      <div className="grid grid-cols-2 gap-1.5" onClick={(e) => e.stopPropagation()}>
         <button
           onClick={onEvolve}
           className="flex items-center justify-center gap-1 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-cyan-400 transition-all cursor-pointer active:scale-95"
@@ -428,7 +431,7 @@ function CoverageMatrix({ members }: { members: PartyMember[] }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function TeamBuilder({ partyLocations, boxLocations, encounters, onMoveToParty, onMoveToBox, onEvolve, onMarkFainted, evolvingLocation }: TeamBuilderProps) {
+export function TeamBuilder({ partyLocations, boxLocations, encounters, onMoveToParty, onMoveToBox, onEvolve, onMarkFainted, onOpenDetail, evolvingLocation }: TeamBuilderProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const members: PartyMember[] = partyLocations
@@ -455,6 +458,7 @@ export function TeamBuilder({ partyLocations, boxLocations, encounters, onMoveTo
                 onRemove={() => onMoveToBox(members[i].locName)}
                 onEvolve={() => onEvolve(members[i].locName)}
                 onMarkFainted={() => onMarkFainted(members[i].locName)}
+                onOpenDetail={() => onOpenDetail(members[i].locName)}
                 isEvolving={evolvingLocation === members[i].locName}
               />
             : <EmptySlot key={`empty-${i}`} onClick={() => !partyFull && setPickerOpen(true)} />
