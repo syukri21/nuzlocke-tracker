@@ -155,6 +155,142 @@ interface DetailData {
   heldItem?: string | null;
 }
 
+function playSadMelody() {
+  const Ctx = window.AudioContext || (window as any).webkitAudioContext;
+  if (!Ctx) return;
+  const ctx = new Ctx();
+  // Descending A minor melody
+  const notes = [
+    { freq: 440.00, t: 0.0 },  // A4
+    { freq: 392.00, t: 0.75 }, // G4
+    { freq: 349.23, t: 1.50 }, // F4
+    { freq: 329.63, t: 2.25 }, // E4
+    { freq: 293.66, t: 3.00 }, // D4
+    { freq: 261.63, t: 3.75 }, // C4
+    { freq: 246.94, t: 4.50 }, // B3
+    { freq: 220.00, t: 5.50 }, // A3 — long final note
+  ];
+  notes.forEach(({ freq, t }, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    const vibrato = ctx.createOscillator();
+    const vibratoGain = ctx.createGain();
+    vibrato.frequency.value = 5;
+    vibratoGain.gain.value = 3;
+    vibrato.connect(vibratoGain);
+    vibratoGain.connect(osc.frequency);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    const isLast = i === notes.length - 1;
+    const dur = isLast ? 2.5 : 0.7;
+    const start = ctx.currentTime + t;
+    gain.gain.setValueAtTime(0, start);
+    gain.gain.linearRampToValueAtTime(0.13, start + 0.12);
+    gain.gain.linearRampToValueAtTime(0.09, start + dur - 0.15);
+    gain.gain.linearRampToValueAtTime(0, start + dur);
+    vibrato.start(start);
+    osc.start(start);
+    osc.stop(start + dur);
+    vibrato.stop(start + dur);
+  });
+}
+
+const SNOWFLAKES = Array.from({ length: 28 }, (_, i) => ({
+  id: i,
+  left: Math.random() * 100,
+  delay: Math.random() * 6,
+  duration: 4 + Math.random() * 5,
+  char: ['❄', '❅', '❆', '·'][Math.floor(Math.random() * 4)],
+}));
+
+function GraveyardCard({ locName, enc, sprite }: {
+  locName: string;
+  enc: { pokemonName?: string; nickname?: string; status: string };
+  sprite?: string;
+}) {
+  const [tribute, setTribute] = useState(false);
+
+  const handleTap = () => {
+    if (tribute) return;
+    setTribute(true);
+    playSadMelody();
+  };
+
+  return (
+    <div className={cn(
+      "relative bg-[#212121] rounded-xl border border-white/5 p-4 overflow-hidden transition-colors duration-2000",
+      tribute && "border-blue-900/30 bg-[#181820]"
+    )}>
+      {/* Snow overlay */}
+      {tribute && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-10">
+          {SNOWFLAKES.map(sf => (
+            <span
+              key={sf.id}
+              className="snowflake"
+              style={{
+                left: `${sf.left}%`,
+                animationDelay: `${sf.delay}s`,
+                animationDuration: `${sf.duration}s`,
+              }}
+            >
+              {sf.char}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div className="relative z-20 flex items-center gap-4">
+        {/* Tappable image */}
+        <button
+          onClick={handleTap}
+          className="flex-shrink-0 w-16 h-16 flex items-center justify-center rounded-xl bg-black/40 border border-white/5 overflow-hidden cursor-pointer active:scale-95 transition-transform"
+          title={tribute ? undefined : "Tap to remember"}
+        >
+          {sprite ? (
+            <img
+              src={sprite}
+              alt={enc.pokemonName}
+              className={cn(
+                "w-14 h-14 object-contain",
+                tribute ? "tribute-sprite" : "opacity-[0.08] grayscale brightness-50"
+              )}
+            />
+          ) : (
+            <Skull className={cn("h-7 w-7", tribute ? "text-gray-500 opacity-40" : "text-gray-700")} />
+          )}
+          {!tribute && (
+            <div className="absolute inset-0 flex items-end justify-center pb-1">
+              <span className="text-[7px] text-gray-600 font-medium">tap</span>
+            </div>
+          )}
+        </button>
+
+        {/* Info */}
+        <div className="flex-1 min-w-0">
+          {enc.nickname && (
+            <div className={cn("text-base font-black truncate transition-colors duration-1000", tribute ? "text-gray-500" : "text-gray-300")}>
+              {enc.nickname}
+            </div>
+          )}
+          <div className={cn("font-bold truncate transition-colors duration-1000", enc.nickname ? "text-xs text-gray-600" : "text-sm text-gray-400")}>
+            {enc.pokemonName}
+          </div>
+          <div className="text-[10px] text-gray-700 mt-0.5 truncate">Fell at {locName}</div>
+          {tribute && (
+            <div className="text-[9px] text-blue-400/50 mt-1 font-medium">Remembered forever</div>
+          )}
+        </div>
+
+        {/* Skull */}
+        <Skull className={cn("h-4 w-4 flex-shrink-0 transition-colors duration-1000", tribute ? "text-gray-700" : "text-red-900/60")} />
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const { state, updateEncounter, markFainted } = useRunStore();
   const [activeMainTab, setActiveMainTab] = useState<'Game' | 'Box' | 'Grave'>('Game');
@@ -828,10 +964,22 @@ export default function App() {
           )}
 
           {activeMainTab === 'Grave' && (
-            <div className="space-y-4">
-              <div className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2 mb-6">Graveyard</div>
+            <div className="space-y-3">
+              <div className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2 mb-4">Graveyard</div>
               {state.graveyard.length > 0 ? (
-                state.graveyard.map(locName => renderEncounterRow(locName))
+                state.graveyard.map(locName => {
+                  const enc = state.encounters[locName];
+                  if (!enc?.pokemonName) return null;
+                  const sprite = spriteCache[enc.pokemonName.toLowerCase()];
+                  return (
+                    <GraveyardCard
+                      key={locName}
+                      locName={locName}
+                      enc={enc}
+                      sprite={sprite}
+                    />
+                  );
+                })
               ) : (
                 <div className="flex flex-col items-center justify-center py-20 bg-[#212121] rounded-2xl border border-dashed border-white/10 opacity-50">
                   <Skull className="h-10 w-10 mb-3 text-gray-500" />
