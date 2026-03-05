@@ -1,0 +1,18 @@
+{
+  "name": "Pokémon Lazarus Nuzlocke Tracker",
+  "short_name": "Nuzlocke",
+  "description": "Track your Pokémon Lazarus Nuzlocke run — encounters, box, graveyard and bosses.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#111111",
+  "theme_color": "#111111",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
