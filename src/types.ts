@@ -31,6 +31,20 @@ export interface Boss {
   keyPokemon: string[];
 }
 
+export interface DetailData {
+  sprite: string;
+  name: string;
+  nickname?: string;
+  types: string[];
+  stats: { name: string; value: number }[];
+  abilities: string[];
+  height: number;
+  weight: number;
+  evolutionLine?: string[];
+  moves?: string[];
+  heldItem?: string | null;
+}
+
 export interface RunState {
   playerName: string;
   difficulty: 'Normal' | 'Hardcore';
