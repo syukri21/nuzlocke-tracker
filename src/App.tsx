@@ -458,7 +458,7 @@ export default function App() {
                     {['Nuzlocke', 'Routes', 'Bosses', 'Upcoming'].map((tab) => (
                       <button
                         key={tab}
-                        onClick={() => setActiveSubTab(tab as any)}
+                        onClick={() => { setActiveSubTab(tab as any); setSearchTerm(''); }}
                         className={cn(
                           "text-sm font-bold transition-all relative pb-1 whitespace-nowrap",
                           activeSubTab === tab ? "text-white" : "text-gray-500 hover:text-gray-300"
@@ -477,55 +477,131 @@ export default function App() {
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
                 <input
                   type="text"
-                  placeholder="Search location..."
+                  placeholder={
+                    activeSubTab === 'Bosses' ? 'Search bosses...' :
+                    activeSubTab === 'Routes' ? 'Search routes or Pokémon...' :
+                    activeSubTab === 'Upcoming' ? 'Search upcoming locations...' :
+                    'Search location...'
+                  }
                   className="w-full bg-[#1a1a1a] border border-white/5 rounded-xl py-3 pl-10 pr-4 text-sm focus:outline-none focus:border-white/10 transition-colors"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
 
-              {/* Encounter List */}
-              <div className="space-y-4">
-                {locationsData.locations
-                  .filter(loc => loc.name.toLowerCase().includes(searchTerm.toLowerCase()))
-                  .map(loc => renderEncounterRow(loc.name))}
-              </div>
+              {/* Nuzlocke Tab */}
+              {activeSubTab === 'Nuzlocke' && (
+                <div className="space-y-4">
+                  {locationsData.locations
+                    .filter(loc => loc.name.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .map(loc => renderEncounterRow(loc.name))}
+                </div>
+              )}
 
-              {/* Boss List */}
-              <div className="mt-10 space-y-3">
-                <div className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2 mb-3">Upcoming Bosses</div>
-                {bossesData.bosses.map(boss => (
-                  <div key={boss.name} className="flex flex-col p-4 bg-[#212121] rounded-xl border border-white/5 shadow-sm relative overflow-hidden">
-                    {/* Decorative gradient blur in background */}
-                    <div className="absolute -top-10 -right-10 w-32 h-32 bg-red-500/5 rounded-full blur-2xl" />
-
-                    <div className="relative z-10 flex items-center justify-between mb-3">
-                      <div>
-                        <h3 className="text-base font-bold text-white">{boss.name}</h3>
-                        <p className="text-xs text-gray-500">{boss.location}</p>
-                      </div>
-                      <div className="px-2 py-1 bg-[#1a1a1a] rounded text-xs font-bold text-gray-400 border border-white/5">
-                        Lv {boss.levelCap}
-                      </div>
-                    </div>
-
-                    <div className="relative z-10 flex items-center justify-between">
-                      <div className="flex flex-wrap gap-2">
-                        {boss.keyPokemon.map((p, i) => (
-                          <div key={i} className="h-10 w-10 rounded-full bg-[#1a1a1a] flex items-center justify-center border border-white/5 shadow-inner">
-                            {bossSprites[p] ? (
-                              <img src={bossSprites[p]} alt={p} className="w-8 h-8 object-contain drop-shadow-md" />
-                            ) : (
-                              <span className="text-[10px] font-bold text-gray-600">{p.substring(0, 2)}</span>
-                            )}
+              {/* Routes Tab */}
+              {activeSubTab === 'Routes' && (
+                <div className="space-y-3">
+                  {locationsData.locations
+                    .filter(loc => {
+                      const q = searchTerm.toLowerCase();
+                      if (!q) return true;
+                      if (loc.name.toLowerCase().includes(q)) return true;
+                      return Object.values(loc.encounters).flat().some(p => p.name.toLowerCase().includes(q));
+                    })
+                    .map(loc => {
+                      const allPokemon = Object.entries(loc.encounters);
+                      return (
+                        <div key={loc.name} className="bg-[#212121] rounded-xl border border-white/5 p-3 shadow-sm">
+                          <div className="text-xs font-bold text-white mb-2">{loc.name}</div>
+                          <div className="space-y-1.5">
+                            {allPokemon.map(([method, pokemon]) => (
+                              <div key={method} className="flex items-start gap-2">
+                                <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wide min-w-[60px] pt-0.5">{method.replace('Fishing ', '').replace('(', '').replace(')', '')}</span>
+                                <div className="flex flex-wrap gap-1">
+                                  {pokemon.map((p: { name: string; id: number }) => {
+                                    const sprite = spriteCache[p.name.toLowerCase()];
+                                    return (
+                                      <div key={p.name} className="flex items-center gap-1 bg-black/30 rounded-md px-1.5 py-0.5">
+                                        {sprite && <img src={sprite} alt={p.name} className="w-4 h-4 object-contain" />}
+                                        <span className="text-[9px] text-gray-300">{p.name}</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            ))}
                           </div>
-                        ))}
+                        </div>
+                      );
+                    })}
+                </div>
+              )}
+
+              {/* Bosses Tab */}
+              {activeSubTab === 'Bosses' && (
+                <div className="space-y-3">
+                  {bossesData.bosses
+                    .filter(boss => {
+                      const q = searchTerm.toLowerCase();
+                      if (!q) return true;
+                      return boss.name.toLowerCase().includes(q) ||
+                        boss.location.toLowerCase().includes(q) ||
+                        boss.keyPokemon.some(p => p.toLowerCase().includes(q));
+                    })
+                    .map(boss => (
+                      <div key={boss.name} className="flex flex-col p-4 bg-[#212121] rounded-xl border border-white/5 shadow-sm relative overflow-hidden">
+                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-red-500/5 rounded-full blur-2xl" />
+                        <div className="relative z-10 flex items-center justify-between mb-3">
+                          <div>
+                            <h3 className="text-base font-bold text-white">{boss.name}</h3>
+                            <p className="text-xs text-gray-500">{boss.location}</p>
+                          </div>
+                          <div className="px-2 py-1 bg-[#1a1a1a] rounded text-xs font-bold text-gray-400 border border-white/5">
+                            Lv {boss.levelCap}
+                          </div>
+                        </div>
+                        <div className="relative z-10 flex items-center justify-between">
+                          <div className="flex flex-wrap gap-2">
+                            {boss.keyPokemon.map((p, i) => (
+                              <div key={i} className="h-10 w-10 rounded-full bg-[#1a1a1a] flex items-center justify-center border border-white/5 shadow-inner">
+                                {bossSprites[p] ? (
+                                  <img src={bossSprites[p]} alt={p} className="w-8 h-8 object-contain drop-shadow-md" />
+                                ) : (
+                                  <span className="text-[10px] font-bold text-gray-600">{p.substring(0, 2)}</span>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-gray-600" />
+                        </div>
                       </div>
-                      <ChevronRight className="h-4 w-4 text-gray-600" />
+                    ))}
+                </div>
+              )}
+
+              {/* Upcoming Tab — locations not yet encountered */}
+              {activeSubTab === 'Upcoming' && (
+                <div className="space-y-4">
+                  {locationsData.locations
+                    .filter(loc => {
+                      const enc = state.encounters[loc.name];
+                      const notDone = !enc || enc.status === 'None';
+                      if (!notDone) return false;
+                      return loc.name.toLowerCase().includes(searchTerm.toLowerCase());
+                    })
+                    .map(loc => renderEncounterRow(loc.name))}
+                  {locationsData.locations.filter(loc => {
+                    const enc = state.encounters[loc.name];
+                    return (!enc || enc.status === 'None') && loc.name.toLowerCase().includes(searchTerm.toLowerCase());
+                  }).length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-20 bg-[#212121] rounded-2xl border border-dashed border-white/10 opacity-50">
+                      <CheckCircle2 className="h-10 w-10 mb-3 text-emerald-500" />
+                      <p className="text-sm font-medium text-gray-400">All caught up!</p>
+                      <p className="text-[10px] text-gray-600 mt-1">No pending locations remaining.</p>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
