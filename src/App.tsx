@@ -162,8 +162,8 @@ export default function App() {
       // Populate boss sprites from cache
       const newSprites: Record<string, string> = {};
       bossesData.bosses.forEach(boss => {
-        boss.keyPokemon.forEach(p => {
-          if (pokemonDataCache[p.toLowerCase()]?.sprite) newSprites[p] = pokemonDataCache[p.toLowerCase()].sprite;
+        boss.pokemon.forEach(p => {
+          if (pokemonDataCache[p.name.toLowerCase()]?.sprite) newSprites[p.name] = pokemonDataCache[p.name.toLowerCase()].sprite;
         });
       });
       setBossSprites(newSprites);
@@ -634,36 +634,71 @@ export default function App() {
                       if (!q) return true;
                       return boss.name.toLowerCase().includes(q) ||
                         boss.location.toLowerCase().includes(q) ||
-                        boss.keyPokemon.some(p => p.toLowerCase().includes(q));
+                        boss.trainerType.toLowerCase().includes(q) ||
+                        boss.pokemon.some(p => p.name.toLowerCase().includes(q));
                     })
-                    .map(boss => (
-                      <div key={boss.name} className="flex flex-col p-4 bg-[#212121] rounded-xl border border-white/5 shadow-sm relative overflow-hidden">
-                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-red-500/5 rounded-full blur-2xl" />
-                        <div className="relative z-10 flex items-center justify-between mb-3">
-                          <div>
-                            <h3 className="text-base font-bold text-white">{boss.name}</h3>
-                            <p className="text-xs text-gray-500">{boss.location}</p>
+                    .map((boss, bi) => {
+                      const acePokemon = boss.pokemon.find(p => p.isAce);
+                      const trainerTypeColor =
+                        boss.trainerType === 'Gym Leader' ? 'text-yellow-400 bg-yellow-400/10' :
+                        boss.trainerType === 'Elite 4' ? 'text-purple-400 bg-purple-400/10' :
+                        boss.trainerType === 'Champion' ? 'text-red-400 bg-red-400/10' :
+                        boss.trainerType === 'Team Chimera' ? 'text-pink-400 bg-pink-400/10' :
+                        'text-blue-400 bg-blue-400/10';
+                      return (
+                        <div key={`${boss.name}-${bi}`} className="flex flex-col bg-[#212121] rounded-xl border border-white/5 shadow-sm overflow-hidden">
+                          {/* Header */}
+                          <div className="p-3 pb-2">
+                            <div className="flex items-start justify-between gap-2">
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <h3 className="text-sm font-bold text-white">{boss.name}</h3>
+                                  <span className={cn("text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded", trainerTypeColor)}>{boss.trainerType}</span>
+                                </div>
+                                <p className="text-[10px] text-gray-500 mt-0.5">{boss.location}</p>
+                              </div>
+                              <div className="flex-shrink-0 px-2 py-1 bg-black/30 rounded text-xs font-bold text-gray-400 border border-white/5">
+                                Lv {boss.levelCap}
+                              </div>
+                            </div>
+                            {boss.items && (
+                              <p className="text-[9px] text-gray-600 mt-1 leading-snug">{boss.items}</p>
+                            )}
                           </div>
-                          <div className="px-2 py-1 bg-[#1a1a1a] rounded text-xs font-bold text-gray-400 border border-white/5">
-                            Lv {boss.levelCap}
-                          </div>
-                        </div>
-                        <div className="relative z-10 flex items-center justify-between">
-                          <div className="flex flex-wrap gap-2">
-                            {boss.keyPokemon.map((p, i) => (
-                              <div key={i} className="h-10 w-10 rounded-full bg-[#1a1a1a] flex items-center justify-center border border-white/5 shadow-inner">
-                                {bossSprites[p] ? (
-                                  <img src={bossSprites[p]} alt={p} className="w-8 h-8 object-contain drop-shadow-md" />
-                                ) : (
-                                  <span className="text-[10px] font-bold text-gray-600">{p.substring(0, 2)}</span>
+                          {/* Pokemon team */}
+                          <div className="px-3 pb-3 flex flex-wrap gap-2">
+                            {boss.pokemon.map((p, i) => (
+                              <div key={i} className={cn(
+                                "flex flex-col items-center gap-0.5 rounded-lg px-1.5 py-1.5 min-w-[48px]",
+                                p.isAce ? "bg-yellow-500/10 border border-yellow-500/30" : "bg-black/30 border border-white/5"
+                              )}>
+                                <div className="relative h-9 w-9 flex items-center justify-center">
+                                  {bossSprites[p.name] ? (
+                                    <img src={bossSprites[p.name]} alt={p.name} className="w-8 h-8 object-contain drop-shadow-md" />
+                                  ) : (
+                                    <span className="text-[9px] font-bold text-gray-600">{p.name.substring(0, 3)}</span>
+                                  )}
+                                  {p.isAce && (
+                                    <span className="absolute -top-1 -right-1 text-yellow-400 text-[8px]">★</span>
+                                  )}
+                                </div>
+                                <span className="text-[8px] text-gray-400 text-center leading-tight max-w-[48px] truncate">{p.name}</span>
+                                <span className="text-[8px] text-gray-600">Lv {p.level}</span>
+                                {p.heldItem && (
+                                  <span className="text-[7px] text-orange-400/80 text-center leading-tight max-w-[48px] truncate">{p.heldItem}</span>
                                 )}
                               </div>
                             ))}
                           </div>
-                          <ChevronRight className="h-4 w-4 text-gray-600" />
+                          {/* Ace detail strip */}
+                          {acePokemon && (
+                            <div className="border-t border-white/5 px-3 py-2 bg-yellow-500/5">
+                              <p className="text-[9px] text-yellow-500/70 font-medium">Ace: {acePokemon.name} — {acePokemon.ability} — {acePokemon.moves.join(', ')}</p>
+                            </div>
+                          )}
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                 </div>
               )}
 

@@ -2,39 +2,3107 @@
   "bosses": [
     {
       "name": "Polymnia",
-      "location": "Acrisia City (Surf)",
+      "location": "Jusmail Town",
       "levelCap": 12,
-      "keyPokemon": ["Cutiefly", "Skiddo"]
+      "trainerType": "Gym Leader",
+      "items": "Red, 1x Yellow, Blue | 1x Super Potion",
+      "pokemon": [
+        {
+          "name": "Cutiefly",
+          "level": 11,
+          "heldItem": null,
+          "ability": "Honey Gather",
+          "moves": [
+            "Stun Spore",
+            "Draining Kiss",
+            "Absorb",
+            "U-Turn"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Shroomish",
+          "level": 12,
+          "heldItem": null,
+          "ability": "Effect Spore",
+          "moves": [
+            "Tackle",
+            "Mega Drain",
+            "Bullet Seed",
+            "Spore"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Pumpkaboo",
+          "level": 12,
+          "heldItem": null,
+          "ability": "Tangling Hair",
+          "moves": [
+            "Confuse Ray",
+            "Bullet Seed",
+            "Shadow Sneak",
+            "Will-O-Wisp"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Timburr",
+          "level": 12,
+          "heldItem": null,
+          "ability": "Guts",
+          "moves": [
+            "Knock Off",
+            "Low Kick",
+            "Rock Throw",
+            "Leer"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Skiddo",
+          "level": 13,
+          "heldItem": null,
+          "ability": "Sap Sipper",
+          "moves": [
+            "Vine Whip",
+            "Bulk Up",
+            "Leech Seed",
+            "Synthesis"
+          ],
+          "isAce": false
+        }
+      ]
     },
     {
       "name": "Rania",
       "location": "Jusmail Town",
-      "levelCap": 12,
-      "keyPokemon": ["Buizel", "Vulpix", "Bellsprout"]
-    },
-    {
-      "name": "Chimera Admin (Bronze North)",
-      "location": "Bronze Fields North",
-      "levelCap": 18,
-      "keyPokemon": ["Magnemite", "Tauros"]
+      "levelCap": 19,
+      "trainerType": "Special",
+      "items": "Yellow",
+      "pokemon": [
+        {
+          "name": "Buizel",
+          "level": 11,
+          "heldItem": null,
+          "ability": "Swift Swim",
+          "moves": [
+            "Water Gun",
+            "Quick Attack",
+            "Growl",
+            "Tackle"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Vulpix",
+          "level": 12,
+          "heldItem": null,
+          "ability": "Flash Fire",
+          "moves": [
+            "Ember",
+            "Disable",
+            "Tail Whip",
+            "Quick Attack"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Bellsprout",
+          "level": 13,
+          "heldItem": null,
+          "ability": "Chlorophyll",
+          "moves": [
+            "Growth",
+            "Acid",
+            "Vine Whip",
+            "Sleep Powder"
+          ],
+          "isAce": false
+        }
+      ]
     },
     {
       "name": "Ourani",
-      "location": "Kalami Gym",
+      "location": "Kalami City",
       "levelCap": 19,
-      "keyPokemon": ["Klawf", "Larvitar"]
+      "trainerType": "Gym Leader",
+      "items": "Red, 2x Yellow, Blue | 1x Super Potion",
+      "pokemon": [
+        {
+          "name": "Klawf",
+          "level": 18,
+          "heldItem": null,
+          "ability": "Anger Shell",
+          "moves": [
+            "Rock Smash",
+            "Bulldoze",
+            "Metal Claw",
+            "Rock Tomb"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Hisuian Voltorb",
+          "level": 19,
+          "heldItem": "Wide Lens",
+          "ability": "Seed Sower",
+          "moves": [
+            "Bullet Seed",
+            "Charge Beam",
+            "Stun Spore",
+            "Rollout"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Mawile",
+          "level": 18,
+          "heldItem": null,
+          "ability": "Hyper Cutter",
+          "moves": [
+            "Play Rough",
+            "Taunt",
+            "Bite",
+            "Metal Claw"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Hisuian Sneasel",
+          "level": 19,
+          "heldItem": null,
+          "ability": "Inner Focus",
+          "moves": [
+            "Rock Smash",
+            "Trailblaze",
+            "Ice Shard",
+            "Metal Claw"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Larvitar",
+          "level": 20,
+          "heldItem": null,
+          "ability": "Guts",
+          "moves": [
+            "Bite",
+            "Stomping Tantrum",
+            "Rock Tomb",
+            "Payback"
+          ],
+          "isAce": false
+        }
+      ]
     },
     {
-      "name": "Chimera Admin (Erinys)",
-      "location": "Erinys Path West",
-      "levelCap": 20,
-      "keyPokemon": ["Basculin White", "Paldean Tauros"]
+      "name": "Chimera Admin (DB)",
+      "location": "Wanderer's Woods North",
+      "levelCap": 22,
+      "trainerType": "Team Chimera",
+      "items": "3x Yellow, Blue",
+      "pokemon": [
+        {
+          "name": "Magnemite",
+          "level": 20,
+          "heldItem": null,
+          "ability": "Magnet Pull",
+          "moves": [
+            "Sonic Boom",
+            "Magnet Bomb",
+            "Light Screen",
+            "Spark"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Zorua",
+          "level": 20,
+          "heldItem": null,
+          "ability": "Illusion",
+          "moves": [
+            "Snarl",
+            "Skitter Smack",
+            "Fury Swipes",
+            "Fake Tears"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Alolan Grimer",
+          "level": 20,
+          "heldItem": null,
+          "ability": "Poison Touch",
+          "moves": [
+            "Disable",
+            "Bite",
+            "Acid Spray",
+            "Poison Fang"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Galarian Zigzagoon",
+          "level": 19,
+          "heldItem": null,
+          "ability": "Pickup",
+          "moves": [
+            "Snarl",
+            "Headbutt",
+            "Pin Missile",
+            "Baby-Doll Eyes"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Crabrawler",
+          "level": 19,
+          "heldItem": null,
+          "ability": "Hyper Cutter",
+          "moves": [
+            "Bubble Beam",
+            "Rock Smash",
+            "Pursuit",
+            "Leer"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Tauros",
+          "level": 19,
+          "heldItem": null,
+          "ability": "Intimidate",
+          "moves": [
+            "Horn Attack",
+            "Scary Face",
+            "Pursuit",
+            "Rest"
+          ],
+          "isAce": false
+        }
+      ]
     },
     {
       "name": "Kleio",
-      "location": "Bronze Fields South",
+      "location": "Pythios Town",
       "levelCap": 22,
-      "keyPokemon": ["Hisuian Zorua", "Mimikyu"]
+      "trainerType": "Gym Leader",
+      "items": "1x Red, 3x Yellow, Blue | 1x Super Potion, 1x Hyper Potion",
+      "pokemon": [
+        {
+          "name": "Galarian Corsola",
+          "level": 22,
+          "heldItem": "Eviolite",
+          "ability": "Weak Armor",
+          "moves": [
+            "Ancient Power",
+            "Bitter Malice",
+            "Recover",
+            "Perish Song"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Hisuian Zorua",
+          "level": 22,
+          "heldItem": "Focus Sash",
+          "ability": "Illusion",
+          "moves": [
+            "Snarl",
+            "Will-O-Wisp",
+            "Shadow Sneak",
+            "Hex"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Pumpkaboo",
+          "level": 22,
+          "heldItem": null,
+          "ability": "Tangling Hair",
+          "moves": [
+            "Leech Seed",
+            "Confuse Ray",
+            "Hex",
+            "Razor Leaf"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Galarian Ponyta",
+          "level": 23,
+          "heldItem": null,
+          "ability": "Run Away",
+          "moves": [
+            "Trop Kick",
+            "Draining Kiss",
+            "Psybeam",
+            "Stomp"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Bruxish",
+          "level": 20,
+          "heldItem": "Assault Vest",
+          "ability": "Dazzling",
+          "moves": [
+            "Draining Kiss",
+            "Bite",
+            "Aqua Jet",
+            "Water Pulse"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Bronzor",
+          "level": 23,
+          "heldItem": null,
+          "ability": "Levitate",
+          "moves": [
+            "Psywave",
+            "Gyro Ball",
+            "Payback",
+            "Feint Attack"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Noctowl",
+          "level": 21,
+          "heldItem": "Wide Lens",
+          "ability": "Shadow Tag",
+          "moves": [
+            "Psybeam",
+            "Wing Attack",
+            "Hypnosis",
+            "Dream Eater"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Shuppet",
+          "level": 22,
+          "heldItem": null,
+          "ability": "Insomnia",
+          "moves": [
+            "Headbutt",
+            "Will-O-Wisp",
+            "Night Shade",
+            "Knock Off"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Mimikyu",
+          "level": 24,
+          "heldItem": "Muscle Band",
+          "ability": "Disguise",
+          "moves": [
+            "Play Rough",
+            "Shadow Claw",
+            "Feint Attack",
+            "Shadow Sneak"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Chimera Admin",
+      "location": "Erinys Path West",
+      "levelCap": 27,
+      "trainerType": "Team Chimera",
+      "items": "Red, 2x Yellow, Blue",
+      "pokemon": [
+        {
+          "name": "Basculin White",
+          "level": 21,
+          "heldItem": null,
+          "ability": "Rattled",
+          "moves": [
+            "Aqua Jet",
+            "Bite",
+            "Zen Headbutt",
+            "Shadow Sneak"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Cufant",
+          "level": 21,
+          "heldItem": null,
+          "ability": "Sheer Force",
+          "moves": [
+            "Bulldoze",
+            "Rock Smash",
+            "Iron Defense",
+            "Rollout"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Galarian Meowth",
+          "level": 21,
+          "heldItem": null,
+          "ability": "Pickup",
+          "moves": [
+            "Fake Out",
+            "Hone Claws",
+            "Metal Claw",
+            "Slash"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Alolan Grimer",
+          "level": 21,
+          "heldItem": null,
+          "ability": "Poison Touch",
+          "moves": [
+            "Acid Spray",
+            "Bite",
+            "Poison Fang",
+            "Disable"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Sandile",
+          "level": 21,
+          "heldItem": null,
+          "ability": "Intimidate",
+          "moves": [
+            "Mud-Slap",
+            "Bite",
+            "Assurance",
+            "Dig"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Paldean Tauros-A",
+          "level": 22,
+          "heldItem": null,
+          "ability": "Intimidate",
+          "moves": [
+            "Work Up",
+            "Double Kick",
+            "Aqua Jet",
+            "Headbutt"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Niko",
+      "location": "Asfal Hills",
+      "levelCap": 27,
+      "trainerType": "Special",
+      "items": "2x Yellow, Blue | 1x Super Potion",
+      "pokemon": [
+        {
+          "name": "Herdier",
+          "level": 25,
+          "heldItem": null,
+          "ability": "Intimidate",
+          "moves": [
+            "Work Up",
+            "Take Down",
+            "Crunch",
+            "Helping Hand"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Alolan Sandshrew",
+          "level": 25,
+          "heldItem": null,
+          "ability": "Snow Cloak",
+          "moves": [
+            "Iron Defense",
+            "Metal Claw",
+            "Fury Swipes",
+            "Swift"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Mudbray",
+          "level": 25,
+          "heldItem": null,
+          "ability": "Own Tempo",
+          "moves": [
+            "Double Kick",
+            "High Horsepower",
+            "Stomp",
+            "Bide"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Cyclizar",
+          "level": 25,
+          "heldItem": null,
+          "ability": "Shed Skin",
+          "moves": [
+            "Rock Smash",
+            "Bite",
+            "Quick Attack",
+            "U-Turn"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Duskull",
+          "level": 26,
+          "heldItem": null,
+          "ability": "Levitate",
+          "moves": [
+            "Foresight",
+            "Shadow Sneak",
+            "Pursuit",
+            "Will-O-Wisp"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Terpsikore",
+      "location": "Sofos City",
+      "levelCap": 27,
+      "trainerType": "Gym Leader",
+      "items": "Red, 3x Yellow, Blue | 1x Hyper Potion",
+      "pokemon": [
+        {
+          "name": "Heracross",
+          "level": 27,
+          "heldItem": "Heracronite",
+          "ability": "Swarm",
+          "moves": [
+            "Bullet Seed",
+            "Arm Thrust",
+            "Aerial Ace",
+            "Horn Attack"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Hisuian Sneasel",
+          "level": 27,
+          "heldItem": null,
+          "ability": "Inner Focus",
+          "moves": [
+            "Hone Claws",
+            "Rock Smash",
+            "Metal Claw",
+            "Ice Shard"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Unown",
+          "level": 28,
+          "heldItem": null,
+          "ability": "Levitate",
+          "moves": [
+            "Hidden Power",
+            "Freezing Glare"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Gothorita",
+          "level": 27,
+          "heldItem": null,
+          "ability": "Frisk",
+          "moves": [
+            "Future Sight",
+            "Psybeam",
+            "Feint Attack",
+            "Embargo"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Meditite",
+          "level": 27,
+          "heldItem": null,
+          "ability": "Telepathy",
+          "moves": [
+            "Calm Mind",
+            "Force Palm",
+            "Confusion",
+            "Detect"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Pawmo",
+          "level": 27,
+          "heldItem": null,
+          "ability": "Volt Absorb",
+          "moves": [
+            "Slam",
+            "Spark",
+            "Arm Thrust",
+            "Nuzzle"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Stantler",
+          "level": 27,
+          "heldItem": null,
+          "ability": "Intimidate",
+          "moves": [
+            "Confuse Ray",
+            "Psyshield Bash",
+            "Stomp",
+            "Take Down"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Mienfoo",
+          "level": 29,
+          "heldItem": null,
+          "ability": "Inner Focus",
+          "moves": [
+            "Meditate",
+            "Drain Punch",
+            "Fake Out",
+            "Detect"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Euterpe",
+      "location": "Myrrini Island",
+      "levelCap": 31,
+      "trainerType": "Gym Leader",
+      "items": "Red, 4x Yellow, Blue | 1x Hyper Potion, 1x Full Heal",
+      "pokemon": [
+        {
+          "name": "Gyarados",
+          "level": 32,
+          "heldItem": "Gyaradosite",
+          "ability": "Intimidate",
+          "moves": [
+            "Bite",
+            "Aqua Tail",
+            "Ice Fang",
+            "Poison Fang"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Hypno",
+          "level": 32,
+          "heldItem": null,
+          "ability": "Poison Puppeteer",
+          "moves": [
+            "Disable",
+            "Psybeam",
+            "Knock Off",
+            "Poison Gas"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Shedinja",
+          "level": 32,
+          "heldItem": null,
+          "ability": "Wonder Guard",
+          "moves": [
+            "Sand Attack",
+            "Fell Stinger",
+            "Shadow Sneak",
+            "Confuse Ray"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Haunter",
+          "level": 33,
+          "heldItem": null,
+          "ability": "Levitate",
+          "moves": [
+            "Mean Look",
+            "Shadow Ball",
+            "Sludge",
+            "Confuse Ray"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Grafaiai",
+          "level": 33,
+          "heldItem": null,
+          "ability": "Unburden",
+          "moves": [
+            "Pounce",
+            "Poison Jab",
+            "Flower Trick",
+            "U-Turn"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Hisuian Sneasel",
+          "level": 33,
+          "heldItem": null,
+          "ability": "Inner Focus",
+          "moves": [
+            "Knock Off",
+            "Poison Jab",
+            "Slash",
+            "Ice Shard"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Dragalge",
+          "level": 33,
+          "heldItem": null,
+          "ability": "Poison Point",
+          "moves": [
+            "Water Pulse",
+            "Toxic",
+            "Venoshock",
+            "Feint Attack"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Tentacruel",
+          "level": 34,
+          "heldItem": null,
+          "ability": "Clear Body",
+          "moves": [
+            "Acid Spray",
+            "Water Pulse",
+            "Poison Jab",
+            "Deepwater Curse"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Rania",
+      "location": "Péntepetal City",
+      "levelCap": 36,
+      "trainerType": "Special",
+      "items": "1x Red, 2x Yellow, Blue | 1x Hyper Potion",
+      "pokemon": [
+        {
+          "name": "Floatzel",
+          "level": 32,
+          "heldItem": null,
+          "ability": "Swift Swim",
+          "moves": [
+            "Ice Fang",
+            "Aqua Jet",
+            "Double Hit",
+            "Swift"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Ninetales",
+          "level": 32,
+          "heldItem": null,
+          "ability": "Flash Fire",
+          "moves": [
+            "Will-O-Wisp",
+            "Flame Burst",
+            "Hex",
+            "Feint Attack"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Flareon",
+          "level": 32,
+          "heldItem": null,
+          "ability": "Fur Coat",
+          "moves": [
+            "Fire Spin",
+            "Fire Fang",
+            "Bite",
+            "Quick Attack"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Finizen",
+          "level": 32,
+          "heldItem": null,
+          "ability": "Water Veil",
+          "moves": [
+            "Covet",
+            "Dive",
+            "Pluck",
+            "Aqua Jet"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Hawlucha",
+          "level": 32,
+          "heldItem": null,
+          "ability": "Limber",
+          "moves": [
+            "Trailblaze",
+            "Karate Chop",
+            "Aerial Ace",
+            "Roost"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Mawile",
+          "level": 32,
+          "heldItem": null,
+          "ability": "Hyper Cutter",
+          "moves": [
+            "Crunch",
+            "Iron Head",
+            "Covet",
+            "Ice Fang"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Weepinbell",
+          "level": 32,
+          "heldItem": null,
+          "ability": "Chlorophyll",
+          "moves": [
+            "Knock Off",
+            "Razor Leaf",
+            "Sludge",
+            "Poison Powder"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Chimera Grunt",
+      "location": "Péntepetal City",
+      "levelCap": 36,
+      "trainerType": "Team Chimera",
+      "items": "Yellow | Rania heals then straight into fight",
+      "pokemon": [
+        {
+          "name": "Cranidos",
+          "level": 33,
+          "heldItem": null,
+          "ability": "Mold Breaker",
+          "moves": [
+            "Rock Smash",
+            "Headbutt",
+            "Submission"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Shieldon",
+          "level": 33,
+          "heldItem": null,
+          "ability": "Sturdy",
+          "moves": [
+            "Protect",
+            "Magnet Bomb",
+            "Rock Throw"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Girafarig",
+          "level": 33,
+          "heldItem": null,
+          "ability": "Inner Focus",
+          "moves": [
+            "Nasty Plot",
+            "Psybeam",
+            "Stomp",
+            "Agility"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Spiritomb",
+          "level": 33,
+          "heldItem": null,
+          "ability": "Pressure",
+          "moves": [
+            "Sucker Punch",
+            "Ominous Wind",
+            "Feint Attack",
+            "Confuse Ray"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Chimera Admin",
+      "location": "Marmaro Mines",
+      "levelCap": 36,
+      "trainerType": "Team Chimera",
+      "items": "4x Yellow, Blue",
+      "pokemon": [
+        {
+          "name": "Dusk Lycanroc",
+          "level": 34,
+          "heldItem": null,
+          "ability": "Tough Claws",
+          "moves": [
+            "Stealth Rock",
+            "Rock Tomb",
+            "Trop Kick",
+            "Accelerock"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Passimian",
+          "level": 34,
+          "heldItem": null,
+          "ability": "Receiver",
+          "moves": [
+            "Bulk Up",
+            "Headbutt",
+            "Rock Smash",
+            "Seed Bomb"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Wyrdeer",
+          "level": 35,
+          "heldItem": null,
+          "ability": "Intimidate",
+          "moves": [
+            "Hypnosis",
+            "Take Down",
+            "Psyshield Bash",
+            "Stomp"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Huntail",
+          "level": 35,
+          "heldItem": null,
+          "ability": "Intimidate",
+          "moves": [
+            "Whirlpool",
+            "Dive",
+            "Breaking Swipe",
+            "Ice Fang"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Paldean Tauros-C",
+          "level": 34,
+          "heldItem": null,
+          "ability": "Intimidate",
+          "moves": [
+            "Work Up",
+            "Raging Bull",
+            "Zen Headbutt",
+            "Headbutt"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Steelix",
+          "level": 35,
+          "heldItem": null,
+          "ability": "Rock Head",
+          "moves": [
+            "Fire Fang",
+            "Rock Tomb",
+            "Ice Fang",
+            "Thunder Fang"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Hisuian Arcanine",
+          "level": 35,
+          "heldItem": null,
+          "ability": "Intimidate",
+          "moves": [
+            "Raging Fury",
+            "Fire Fang",
+            "Smack Down",
+            "Accelerock"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Cooltrainer Stella",
+      "location": "Fresco Isles Mart",
+      "levelCap": 36,
+      "trainerType": "Special",
+      "items": "3x Yellow, Blue | 1x Super Potion",
+      "pokemon": [
+        {
+          "name": "Hawlucha",
+          "level": 36,
+          "heldItem": null,
+          "ability": "Limber",
+          "moves": [
+            "Trailblaze",
+            "Flying Press",
+            "Bounce",
+            "Poison Jab"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Comfey",
+          "level": 36,
+          "heldItem": null,
+          "ability": "Flower Veil",
+          "moves": [
+            "Sweet Scent",
+            "Giga Drain",
+            "Grass Knot",
+            "Synthesis"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Arctozolt",
+          "level": 36,
+          "heldItem": null,
+          "ability": "Volt Absorb",
+          "moves": [
+            "Pluck",
+            "Ice Fang",
+            "Thunder Fang",
+            "Avalanche"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Vibrava",
+          "level": 36,
+          "heldItem": null,
+          "ability": "Levitate",
+          "moves": [
+            "Bug Buzz",
+            "Earth Power",
+            "Breaking Swipe",
+            "Sandstorm"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Dracovish",
+          "level": 36,
+          "heldItem": null,
+          "ability": "Water Absorb",
+          "moves": [
+            "Super Fang",
+            "Dragon Breath",
+            "Ice Fang",
+            "Stomp"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Noctowl",
+          "level": 36,
+          "heldItem": "Noctowlite",
+          "ability": "Shadow Tag",
+          "moves": [
+            "Hypnosis",
+            "Hex",
+            "Wing Attack",
+            "Psybeam"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Thalia & Melpomene (DB)",
+      "location": "Fresco Isles",
+      "levelCap": 36,
+      "trainerType": "Gym Leader",
+      "items": "4x Yellow, Blue | 2x Hyper Potion",
+      "pokemon": [
+        {
+          "name": "Pawmot",
+          "level": 38,
+          "heldItem": null,
+          "ability": "Volt Absorb",
+          "moves": [
+            "Ice Punch",
+            "Thunder Punch",
+            "Power-Up Punch",
+            "Nuzzle"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Lanturn",
+          "level": 38,
+          "heldItem": null,
+          "ability": "Volt Absorb",
+          "moves": [
+            "Signal Beam",
+            "Surf",
+            "Discharge",
+            "Yawn"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Hisuian Electrode",
+          "level": 37,
+          "heldItem": null,
+          "ability": "Seed Sower",
+          "moves": [
+            "Rollout",
+            "Charge Beam",
+            "Grassy Glide",
+            "Thunder Wave"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Mudsdale",
+          "level": 37,
+          "heldItem": null,
+          "ability": "Own Tempo",
+          "moves": [
+            "Rock Smash",
+            "Bulldoze",
+            "Superpower",
+            "Heavy Slam"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Krookodile",
+          "level": 38,
+          "heldItem": null,
+          "ability": "Intimidate",
+          "moves": [
+            "Sand Tomb",
+            "Bulldoze",
+            "Crunch",
+            "Foul Play"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Camerupt",
+          "level": 38,
+          "heldItem": null,
+          "ability": "Magma Armor",
+          "moves": [
+            "Curse",
+            "Lava Plume",
+            "Bulldoze",
+            "Body Slam"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Alolan Raichu",
+          "level": 39,
+          "heldItem": null,
+          "ability": "Surge Surfer",
+          "moves": [
+            "Dazzling Gleam",
+            "Discharge",
+            "Psychic",
+            "Double Team"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Steelix",
+          "level": 39,
+          "heldItem": "Steelixite",
+          "ability": "Sand Force",
+          "moves": [
+            "Ice Fang",
+            "Iron Head",
+            "Bulldoze",
+            "Thunder Fang"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Rania",
+      "location": "Palati City",
+      "levelCap": 40,
+      "trainerType": "Special",
+      "items": "1x Red, 2x Yellow, Blue | 1x Hyper Potion",
+      "pokemon": [
+        {
+          "name": "Floatzel",
+          "level": 40,
+          "heldItem": null,
+          "ability": "Swift Swim",
+          "moves": [
+            "Whirlpool",
+            "Jet Punch",
+            "Ice Fang",
+            "Swift"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Ninetales",
+          "level": 40,
+          "heldItem": null,
+          "ability": "Flash Fire",
+          "moves": [
+            "Will-O-Wisp",
+            "Flame Burst",
+            "Hex",
+            "Extrasensory"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Flareon",
+          "level": 40,
+          "heldItem": null,
+          "ability": "Fur Coat",
+          "moves": [
+            "Fire Spin",
+            "Blaze Kick",
+            "Trop Kick",
+            "Quick Attack"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Jumpluff",
+          "level": 41,
+          "heldItem": "Sitrus Berry",
+          "ability": "Chlorophyll",
+          "moves": [
+            "Leech Seed",
+            "Bullet Seed",
+            "Acrobatics",
+            "U-Turn"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Vikavolt",
+          "level": 41,
+          "heldItem": null,
+          "ability": "Levitate",
+          "moves": [
+            "Air Slash",
+            "Bug Buzz",
+            "Thunderbolt",
+            "Dig"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Mawile",
+          "level": 40,
+          "heldItem": null,
+          "ability": "Hyper Cutter",
+          "moves": [
+            "Sucker Punch",
+            "Iron Head",
+            "Covet",
+            "Fire Fang"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Victreebel",
+          "level": 41,
+          "heldItem": "Victreebite",
+          "ability": "Chlorophyll",
+          "moves": [
+            "Knock Off",
+            "Leaf Blade",
+            "Sludge",
+            "Gastro Acid"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Rhadine",
+      "location": "Palati City",
+      "levelCap": 40,
+      "trainerType": "Gym Leader",
+      "items": "Red, 4x Yellow, Blue | 1x Full Restore, 1x Full Heal",
+      "pokemon": [
+        {
+          "name": "Oricorio Baile",
+          "level": 42,
+          "heldItem": "Focus Sash",
+          "ability": "Dancer",
+          "moves": [
+            "Aqua Step",
+            "Fiery Dance",
+            "Air Slash",
+            "Baton Pass"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Togekiss",
+          "level": 42,
+          "heldItem": null,
+          "ability": "Serene Grace",
+          "moves": [
+            "Extrasensory",
+            "Moonblast",
+            "Aura Sphere",
+            "Yawn"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Salazzle",
+          "level": 43,
+          "heldItem": null,
+          "ability": "Corrosion",
+          "moves": [
+            "Nasty Plot",
+            "Flamethrower",
+            "Venoshock",
+            "Toxic"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Chandelure",
+          "level": 43,
+          "heldItem": null,
+          "ability": "Flash Fire",
+          "moves": [
+            "Curse",
+            "Shadow Ball",
+            "Infernal Parade",
+            "Will-O-Wisp"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Braviary",
+          "level": 42,
+          "heldItem": null,
+          "ability": "Keen Eye",
+          "moves": [
+            "Superpower",
+            "Slash",
+            "Fly",
+            "Tailwind"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Paldean Tauros-B",
+          "level": 43,
+          "heldItem": "Chesto Berry",
+          "ability": "Intimidate",
+          "moves": [
+            "Flame Charge",
+            "Raging Bull",
+            "Zen Headbutt",
+            "Rest"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Hisuian Arcanine",
+          "level": 43,
+          "heldItem": null,
+          "ability": "Intimidate",
+          "moves": [
+            "Accelerock",
+            "Flamethrower",
+            "Rock Slide",
+            "Crunch"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Toucannon",
+          "level": 44,
+          "heldItem": "Toucannonite",
+          "ability": "Keen Eye",
+          "moves": [
+            "Flame Charge",
+            "Drill Peck",
+            "Beak Blast",
+            "Flare Blitz"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Chimera Admin (DB)",
+      "location": "Satyr`s Lair",
+      "levelCap": 50,
+      "trainerType": "Team Chimera",
+      "items": "Red, 3x Yellow, Blue | 1x Full Restore",
+      "pokemon": [
+        {
+          "name": "Hisuian Arcanine",
+          "level": 46,
+          "heldItem": null,
+          "ability": "Intimidate",
+          "moves": [
+            "Accelerock",
+            "Flamethrower",
+            "Rock Slide",
+            "Crunch"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Cyclizar",
+          "level": 46,
+          "heldItem": "Cyclizite S",
+          "ability": "Shed Skin",
+          "moves": [
+            "Shift Gear",
+            "Dragon Claw",
+            "Drain Punch",
+            "U-Turn"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Pyroar♂",
+          "level": 47,
+          "heldItem": null,
+          "ability": "Moxie",
+          "moves": [
+            "Flame Charge",
+            "Fire Fang",
+            "Headbutt",
+            "Jaw Lock"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Perrserker",
+          "level": 46,
+          "heldItem": null,
+          "ability": "Battle Armor",
+          "moves": [
+            "Fake Out",
+            "Iron Head",
+            "Night Slash",
+            "Slash"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Passimian",
+          "level": 46,
+          "heldItem": null,
+          "ability": "Receiver",
+          "moves": [
+            "Bulk Up",
+            "Close Combat",
+            "Iron Head",
+            "Seed Bomb"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Type: Null",
+          "level": 46,
+          "heldItem": null,
+          "ability": "Battle Armor",
+          "moves": [
+            "Crush Claw",
+            "Double Hit",
+            "Iron Head",
+            "X-Scissor"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Dusk Lycanroc",
+          "level": 46,
+          "heldItem": null,
+          "ability": "Tough Claws",
+          "moves": [
+            "Accelerock",
+            "Rock Slide",
+            "Trop Kick",
+            "Blaze Kick"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Ceruledge",
+          "level": 47,
+          "heldItem": null,
+          "ability": "Flash Fire",
+          "moves": [
+            "Swords Dance",
+            "Lava Plume",
+            "Shadow Claw",
+            "Shadow Sneak"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Hakamo-o",
+          "level": 47,
+          "heldItem": null,
+          "ability": "Bulletproof",
+          "moves": [
+            "Seismic Toss",
+            "Dual Chop",
+            "Sky Uppercut",
+            "Headbutt"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Gouging Fire",
+          "level": 49,
+          "heldItem": null,
+          "ability": "Protosynthesis",
+          "moves": [
+            "Crush Claw",
+            "Fire Fang",
+            "Dragon Claw",
+            "Burning Bulwark"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Chimera Admin (DB)",
+      "location": "Kaptara West",
+      "levelCap": 50,
+      "trainerType": "Team Chimera",
+      "items": "Red, 3xYellow, Blue | 2x Full Restore",
+      "pokemon": [
+        {
+          "name": "Mamoswine",
+          "level": 46,
+          "heldItem": null,
+          "ability": "Oblivious",
+          "moves": [
+            "Ancient Power",
+            "Earthquake",
+            "Icicle Crash",
+            "Slack Off"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Wyrdeer",
+          "level": 46,
+          "heldItem": "Wyrdeerite",
+          "ability": "Intimidate",
+          "moves": [
+            "Ancient Power",
+            "Earthquake",
+            "Icicle Crash",
+            "Slack Off"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Abomasnow",
+          "level": 46,
+          "heldItem": null,
+          "ability": "Snow Warning",
+          "moves": [
+            "Power-Up Punch",
+            "Wood Hammer",
+            "Ice Punch",
+            "Horn Leech"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Walrein",
+          "level": 47,
+          "heldItem": null,
+          "ability": "Thick Layers",
+          "moves": [
+            "Calm Mind",
+            "Ice Beam",
+            "Surf",
+            "Deepwater Curse"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Feraligatr",
+          "level": 47,
+          "heldItem": null,
+          "ability": "Torrent",
+          "moves": [
+            "Superpower",
+            "Fishious Rend",
+            "Jaw Lock",
+            "Poison Fang"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Alolan Persian",
+          "level": 47,
+          "heldItem": null,
+          "ability": "Fur Coat",
+          "moves": [
+            "Nasty Plot",
+            "Dark Pulse",
+            "Power Gem",
+            "Fake Out"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Arctozolt",
+          "level": 46,
+          "heldItem": null,
+          "ability": "Volt Absorb",
+          "moves": [
+            "Aqua Tail",
+            "Thunder Fang",
+            "Freeze-Dry",
+            "Slam"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Gyarados",
+          "level": 46,
+          "heldItem": null,
+          "ability": "Intimidate",
+          "moves": [
+            "Crunch",
+            "Aqua Tail",
+            "Ice Fang",
+            "Deepwater Curse"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Walking Wake",
+          "level": 49,
+          "heldItem": null,
+          "ability": "Protosynthesis",
+          "moves": [
+            "Aqua Jet",
+            "Scald",
+            "Dragon Pulse",
+            "Flamethrower"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Kalliope (DB)",
+      "location": "Tower of Dioxippus",
+      "levelCap": 50,
+      "trainerType": "Team Chimera",
+      "items": "Red, 3x Yellow, Blue | 1x Full Restore",
+      "pokemon": [
+        {
+          "name": "Hydrapple",
+          "level": 47,
+          "heldItem": null,
+          "ability": "Supersweet Syrup",
+          "moves": [
+            "Parting Shot",
+            "Syrup Bomb",
+            "Fickle Beam",
+            "Burning Jealousy"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Tinkaton",
+          "level": 47,
+          "heldItem": "Tinkatite",
+          "ability": "Mold Breaker",
+          "moves": [
+            "Gigaton Hammer",
+            "Spirit Break",
+            "Iron Head",
+            "Fake Out"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Grimmsnarl",
+          "level": 48,
+          "heldItem": null,
+          "ability": "Prankster",
+          "moves": [
+            "Bulk Up",
+            "False Surrender",
+            "Spirit Break",
+            "Sucker Punch"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Mandibuzz",
+          "level": 48,
+          "heldItem": null,
+          "ability": "Regenerator",
+          "moves": [
+            "Bone Rush",
+            "False Surrender",
+            "Drill Peck",
+            "Leech Life"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Dracozolt",
+          "level": 47,
+          "heldItem": null,
+          "ability": "Volt Absorb",
+          "moves": [
+            "Stomping Tantrum",
+            "Discharge",
+            "Breaking Swipe",
+            "Pluck"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Sneasler",
+          "level": 48,
+          "heldItem": null,
+          "ability": "Pressure",
+          "moves": [
+            "Swords Dance",
+            "Brick Break",
+            "Dire Claw",
+            "Slash"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Tyrantrum",
+          "level": 47,
+          "heldItem": null,
+          "ability": "Strong Jaw",
+          "moves": [
+            "Crunch",
+            "Rock Slide",
+            "Dragon Claw",
+            "Poison Fang"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Silvally",
+          "level": 48,
+          "heldItem": "Fairy Memory",
+          "ability": "RKS System",
+          "moves": [
+            "Crush Claw",
+            "Multi-Attack",
+            "Iron Head",
+            "X-Scissor"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Raging Bolt",
+          "level": 49,
+          "heldItem": null,
+          "ability": "Protosynthesis",
+          "moves": [
+            "Calm Mind",
+            "Discharge",
+            "Dragon Pulse",
+            "Thunderclap"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Rania",
+      "location": "Port Pello",
+      "levelCap": 50,
+      "trainerType": "Special",
+      "items": "1x Red, 4x Yellow, Blue | 1x Full Restore",
+      "pokemon": [
+        {
+          "name": "Floatzel",
+          "level": 48,
+          "heldItem": null,
+          "ability": "Swift Swim",
+          "moves": [
+            "Hydro Pump",
+            "Jet Punch",
+            "Ice Fang",
+            "Flip Turn"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Ninetales",
+          "level": 48,
+          "heldItem": null,
+          "ability": "Flash Fire",
+          "moves": [
+            "Will-O-Wisp",
+            "Flamethrower",
+            "Dazzling Gleam",
+            "Extrasensory"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Vikavolt",
+          "level": 48,
+          "heldItem": null,
+          "ability": "Levitate",
+          "moves": [
+            "Thunderbolt",
+            "Bug Buzz",
+            "Acrobatics",
+            "U-Turn"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Politoed",
+          "level": 48,
+          "heldItem": null,
+          "ability": "Water Absorb",
+          "moves": [
+            "Perish Song",
+            "Waterfall",
+            "Body Slam",
+            "Deepwater Curse"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Dragonair",
+          "level": 48,
+          "heldItem": null,
+          "ability": "Atmospheric",
+          "moves": [
+            "Aqua Tail",
+            "Dragon Pulse",
+            "Power Gem",
+            "Air Cutter"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Minior",
+          "level": 48,
+          "heldItem": "Focus Sash",
+          "ability": "Shields Down",
+          "moves": [
+            "Shell Smash",
+            "Power Gem",
+            "Dazzling Gleam",
+            "Explosion"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Basculegion♂",
+          "level": 48,
+          "heldItem": null,
+          "ability": "Swift Swim",
+          "moves": [
+            "Bitter Malice",
+            "Wave Crash",
+            "Shadow Force",
+            "Thrash"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Hypno",
+          "level": 48,
+          "heldItem": null,
+          "ability": "Insomnia",
+          "moves": [
+            "Nasty Plot",
+            "Psychic",
+            "Dark Pulse",
+            "Poison Jab"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Espathra",
+          "level": 48,
+          "heldItem": null,
+          "ability": "Opportunist",
+          "moves": [
+            "Uproar",
+            "Psychic",
+            "Dazzling Gleam",
+            "Pluck"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Victreebel",
+          "level": 49,
+          "heldItem": "Victreebite",
+          "ability": "Chlorophyll",
+          "moves": [
+            "Knock Off",
+            "Leaf Blade",
+            "Barb Barrage",
+            "Sleep Powder"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Chimera Admin",
+      "location": "Areios Hideout",
+      "levelCap": 50,
+      "trainerType": "Team Chimera",
+      "items": "5x Yellow, Blue | 1x Full Restore",
+      "pokemon": [
+        {
+          "name": "Paldean Tauros-A",
+          "level": 51,
+          "heldItem": null,
+          "ability": "Intimidate",
+          "moves": [
+            "Aqua Jet",
+            "Raging Bull",
+            "Zen Headbutt",
+            "Swagger"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Feraligatr",
+          "level": 51,
+          "heldItem": null,
+          "ability": "Torrent",
+          "moves": [
+            "Ice Fang",
+            "Aqua Tail",
+            "Jaw Lock",
+            "Poison Fang"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Golisopod",
+          "level": 51,
+          "heldItem": null,
+          "ability": "Emergency Exit",
+          "moves": [
+            "First Impression",
+            "Razor Shell",
+            "Pin Missile",
+            "Flip Turn"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Gorebyss",
+          "level": 51,
+          "heldItem": null,
+          "ability": "Regenerator",
+          "moves": [
+            "Draining Kiss",
+            "Aqua Tail",
+            "Dazzling Gleam",
+            "Aqua Ring"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Dewgong",
+          "level": 51,
+          "heldItem": null,
+          "ability": "Thick Layers",
+          "moves": [
+            "Dive",
+            "Ice Beam",
+            "Megahorn",
+            "Aqua Ring"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Basculegion♂",
+          "level": 51,
+          "heldItem": null,
+          "ability": "Swift Swim",
+          "moves": [
+            "Bitter Malice",
+            "Wave Crash",
+            "Phantom Force",
+            "Aqua Tail"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Krookodile",
+          "level": 51,
+          "heldItem": null,
+          "ability": "Intimidate",
+          "moves": [
+            "Skitter Smack",
+            "Earthquake",
+            "Crunch",
+            "Foul Play"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Hisuian Goodra",
+          "level": 51,
+          "heldItem": null,
+          "ability": "Sap Sipper",
+          "moves": [
+            "Shelter",
+            "Dragon Pulse",
+            "Iron Head",
+            "Acid Spray"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Mamoswine",
+          "level": 52,
+          "heldItem": null,
+          "ability": "Oblivious",
+          "moves": [
+            "Bulldoze",
+            "Earthquake",
+            "Icicle Crash",
+            "Slack Off"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Chimera Admin",
+      "location": "Areios Hideout",
+      "levelCap": 50,
+      "trainerType": "Team Chimera",
+      "items": "5x Yellow, Blue | 1x Full Restore",
+      "pokemon": [
+        {
+          "name": "Zebstrika",
+          "level": 52,
+          "heldItem": null,
+          "ability": "Lightning Rod",
+          "moves": [
+            "Flame Charge",
+            "Thunderous Kick",
+            "Blaze Kick",
+            "Stomping Tantrum"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Perrserker",
+          "level": 52,
+          "heldItem": null,
+          "ability": "Battle Armor",
+          "moves": [
+            "Night Slash",
+            "Iron Head",
+            "Icicle Crash",
+            "Slash"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Centiskorch",
+          "level": 52,
+          "heldItem": null,
+          "ability": "Flash Fire",
+          "moves": [
+            "Fell Stinger",
+            "Fire Lash",
+            "Leech Life",
+            "Crunch"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Klawf",
+          "level": 52,
+          "heldItem": null,
+          "ability": "Anger Shell",
+          "moves": [
+            "X-Scissor",
+            "Strength",
+            "Crabhammer",
+            "Rock Slide"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Gogoat",
+          "level": 52,
+          "heldItem": null,
+          "ability": "Sap Sipper",
+          "moves": [
+            "Bulldoze",
+            "Leaf Blade",
+            "Horn Leech",
+            "Milk Drink"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Midnight Lycanroc",
+          "level": 52,
+          "heldItem": null,
+          "ability": "Sturdy",
+          "moves": [
+            "Rock Tomb",
+            "Rock Slide",
+            "Crunch",
+            "Brick Break"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Cradily",
+          "level": 52,
+          "heldItem": null,
+          "ability": "Suction Cups",
+          "moves": [
+            "Salt Cure",
+            "Ancient Power",
+            "Energy Ball",
+            "Giga Drain"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Passimian",
+          "level": 52,
+          "heldItem": null,
+          "ability": "Receiver",
+          "moves": [
+            "Bulk Up",
+            "Close Combat",
+            "Iron Head",
+            "Seed Bomb"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Hisuian Arcanine",
+          "level": 53,
+          "heldItem": null,
+          "ability": "Intimidate",
+          "moves": [
+            "Accelerock",
+            "Flare Blitz",
+            "Rock Slide",
+            "Crunch"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Kalliope",
+      "location": "Areios Hideout",
+      "levelCap": 50,
+      "trainerType": "Gym Leader",
+      "items": "2x Full Restore",
+      "pokemon": [
+        {
+          "name": "Hydrapple",
+          "level": 52,
+          "heldItem": null,
+          "ability": "Supersweet Syrup",
+          "moves": [
+            "Parting Shot",
+            "Syrup Bomb",
+            "Fickle Beam",
+            "Burning Jealousy"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Tinkaton",
+          "level": 52,
+          "heldItem": "Tinkatite",
+          "ability": "Mold Breaker",
+          "moves": [
+            "Gigaton Hammer",
+            "Spirit Break",
+            "Iron Head",
+            "Fake Out"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Dracozolt",
+          "level": 53,
+          "heldItem": null,
+          "ability": "Volt Absorb",
+          "moves": [
+            "Stomping Tantrum",
+            "Bolt Beak",
+            "Breaking Swipe",
+            "Discharge"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Grimmsnarl",
+          "level": 52,
+          "heldItem": null,
+          "ability": "Prankster",
+          "moves": [
+            "Bulk Up",
+            "False Surrender",
+            "Spirit Break",
+            "Sucker Punch"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Silvally",
+          "level": 53,
+          "heldItem": "Fairy Memory",
+          "ability": "RKS System",
+          "moves": [
+            "Crush Claw",
+            "Multi-Attack",
+            "Iron Head",
+            "X-Scissor"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Raging Bolt",
+          "level": 54,
+          "heldItem": null,
+          "ability": "Protosynthesis",
+          "moves": [
+            "Calm Mind",
+            "Discharge",
+            "Dragon Pulse",
+            "Thunderclap"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Rania",
+      "location": "Davosi Straits",
+      "levelCap": 58,
+      "trainerType": "Special",
+      "items": "1x Red, 4x Yellow, Blue | 1x Full Restore",
+      "pokemon": [
+        {
+          "name": "Floatzel",
+          "level": 56,
+          "heldItem": null,
+          "ability": "Swift Swim",
+          "moves": [
+            "Flip Turn",
+            "Hydro Pump",
+            "Ice Fang",
+            "Jet Punch"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Ninetales",
+          "level": 56,
+          "heldItem": null,
+          "ability": "Flash Fire",
+          "moves": [
+            "Will-O-Wisp",
+            "Overheat",
+            "Moonblast",
+            "Extrasensory"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Hisuian Typhlosion",
+          "level": 55,
+          "heldItem": null,
+          "ability": "Blaze",
+          "moves": [
+            "Will-O-Wisp",
+            "Lava Plume",
+            "Infernal Parade",
+            "Extrasensory"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Rampardos",
+          "level": 55,
+          "heldItem": null,
+          "ability": "Mold Breaker",
+          "moves": [
+            "Screech",
+            "Head Smash",
+            "Submission",
+            "Zen Headbutt"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Spiritomb",
+          "level": 55,
+          "heldItem": null,
+          "ability": "Pressure",
+          "moves": [
+            "Nasty Plot",
+            "Fiery Wrath",
+            "Dark Pulse",
+            "Foul Play"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Aurorus",
+          "level": 56,
+          "heldItem": null,
+          "ability": "Refrigerate",
+          "moves": [
+            "Thunder Wave",
+            "Ancient Power",
+            "Freeze-Dry",
+            "Deepwater Curse"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Bewear",
+          "level": 56,
+          "heldItem": null,
+          "ability": "Fluffy",
+          "moves": [
+            "Baby-Doll Eyes",
+            "Thrash",
+            "Hammer Arm",
+            "Slack Off"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Vikavolt",
+          "level": 56,
+          "heldItem": "Lum Berry",
+          "ability": "Levitate",
+          "moves": [
+            "Dig",
+            "Supercell Slam",
+            "Acrobatics",
+            "U-Turn"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Victreebel",
+          "level": 57,
+          "heldItem": "Victreebite",
+          "ability": "Chlorophyll",
+          "moves": [
+            "Knock Off",
+            "Leaf Blade",
+            "Barb Barrage",
+            "Stun Spore"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Polymnia",
+      "location": "Ruins of Ahiyawa",
+      "levelCap": 58,
+      "trainerType": "Elite 4",
+      "items": "Red, 4x Yellow, Blue | 1x Full Restore",
+      "pokemon": [
+        {
+          "name": "Jumpluff",
+          "level": 56,
+          "heldItem": null,
+          "ability": "Chlorophyll",
+          "moves": [
+            "Leech Seed",
+            "Giga Drain",
+            "Acrobatics",
+            "U-Turn"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Abomasnow",
+          "level": 56,
+          "heldItem": null,
+          "ability": "Snow Warning",
+          "moves": [
+            "Power-Up Punch",
+            "Wood Hammer",
+            "Avalanche",
+            "Horn Leech"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Dhelmise",
+          "level": 56,
+          "heldItem": null,
+          "ability": "Steelworker",
+          "moves": [
+            "Anchor Shot",
+            "Phantom Force",
+            "Energy Ball",
+            "Flip Turn"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Appletun",
+          "level": 56,
+          "heldItem": "Yache Berry",
+          "ability": "Ripen",
+          "moves": [
+            "Apple Acid",
+            "Energy Ball",
+            "Dragon Pulse",
+            "Slack Off"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Crustle",
+          "level": 56,
+          "heldItem": null,
+          "ability": "Sturdy",
+          "moves": [
+            "Crabhammer",
+            "X-Scissor",
+            "Rock Slide",
+            "Accelerock"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Tsareena",
+          "level": 56,
+          "heldItem": null,
+          "ability": "Leaf Guard",
+          "moves": [
+            "High Jump Kick",
+            "Trop Kick",
+            "Thunderous Kick",
+            "Stomping Tantrum"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Leafeon",
+          "level": 56,
+          "heldItem": "Quick Claw",
+          "ability": "Leaf Guard",
+          "moves": [
+            "Swords Dance",
+            "Leaf Blade",
+            "Thunderous Kick",
+            "Synthesis"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Meganium",
+          "level": 56,
+          "heldItem": null,
+          "ability": "Overgrow",
+          "moves": [
+            "Light Screen",
+            "Petal Dance",
+            "Moonblast",
+            "Body Slam"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Ribombee",
+          "level": 57,
+          "heldItem": "Ribombite",
+          "ability": "Honey Gather",
+          "moves": [
+            "Syrup Bomb",
+            "Pollen Puff",
+            "Dazzling Gleam",
+            "Draining Kiss"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Terpsikore",
+      "location": "Ruins of Ahiyawa",
+      "levelCap": 58,
+      "trainerType": "Elite 4",
+      "items": "Red, 4x Yellow, Blue | 1x Full Restore",
+      "pokemon": [
+        {
+          "name": "Hisuian Braviary",
+          "level": 57,
+          "heldItem": null,
+          "ability": "Tinted Lens",
+          "moves": [
+            "Frost Breath",
+            "Esper Wing",
+            "Air Slash",
+            "Slash"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Pangoro",
+          "level": 57,
+          "heldItem": null,
+          "ability": "Iron Fist",
+          "moves": [
+            "Bullet Punch",
+            "Sky Uppercut",
+            "Crunch",
+            "Parting Shot"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Reuniclus",
+          "level": 57,
+          "heldItem": null,
+          "ability": "Overcoat",
+          "moves": [
+            "Vacuum Wave",
+            "Psychic",
+            "Giga Drain",
+            "Recover"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Kommo-o",
+          "level": 57,
+          "heldItem": null,
+          "ability": "Bulletproof",
+          "moves": [
+            "Iron Defense",
+            "Dragon Claw",
+            "Sky Uppercut",
+            "Seismic Toss"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Bruxish",
+          "level": 57,
+          "heldItem": null,
+          "ability": "Dazzling",
+          "moves": [
+            "Covet",
+            "Aqua Tail",
+            "Psychic Fangs",
+            "Poison Fang"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Gallade",
+          "level": 57,
+          "heldItem": null,
+          "ability": "Steadfast",
+          "moves": [
+            "Aerial Ace",
+            "Psycho Cut",
+            "Leaf Blade",
+            "Fury Cutter"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Wyrdeer",
+          "level": 57,
+          "heldItem": null,
+          "ability": "Intimidate",
+          "moves": [
+            "Horn Leech",
+            "Take Down",
+            "Psyshield Bash",
+            "Hypnosis"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Medicham",
+          "level": 57,
+          "heldItem": null,
+          "ability": "Telepathy",
+          "moves": [
+            "Blaze Kick",
+            "High Jump Kick",
+            "Psychic",
+            "Trop Kick"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Falinks",
+          "level": 58,
+          "heldItem": "Falinksite",
+          "ability": "Battle Armor",
+          "moves": [
+            "Bulk Up",
+            "Close Combat",
+            "Iron Head",
+            "First Impression"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Euterpe",
+      "location": "Ruins of Ahiyawa",
+      "levelCap": 58,
+      "trainerType": "Elite 4",
+      "items": "Red, 4x Yellow, Blue | 1x Full Restore",
+      "pokemon": [
+        {
+          "name": "Tentacruel",
+          "level": 58,
+          "heldItem": null,
+          "ability": "Clear Body",
+          "moves": [
+            "Toxic Spikes",
+            "Surf",
+            "Sludge Wave",
+            "Deepwater Curse"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Arbok",
+          "level": 58,
+          "heldItem": null,
+          "ability": "Intimidate",
+          "moves": [
+            "Ice Fang",
+            "Poison Fang",
+            "Crunch",
+            "Glare"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Gliscor",
+          "level": 57,
+          "heldItem": null,
+          "ability": "Hyper Cutter",
+          "moves": [
+            "Knock Off",
+            "Drill Run",
+            "Poison Jab",
+            "U-Turn"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Clodsire",
+          "level": 58,
+          "heldItem": null,
+          "ability": "Poison Point",
+          "moves": [
+            "Toxic",
+            "Earthquake",
+            "Sludge Wave",
+            "Shore Up"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Sneasler",
+          "level": 57,
+          "heldItem": null,
+          "ability": "Pressure",
+          "moves": [
+            "Swords Dance",
+            "Poison Jab",
+            "Dire Claw",
+            "Knock Off"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Carracosta",
+          "level": 57,
+          "heldItem": null,
+          "ability": "Solid Rock",
+          "moves": [
+            "Shell Smash",
+            "Liquidation",
+            "Rock Slide",
+            "Crunch"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Lanturn",
+          "level": 58,
+          "heldItem": null,
+          "ability": "Volt Absorb",
+          "moves": [
+            "Yawn",
+            "Surf",
+            "Discharge",
+            "Aqua Ring"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Kabutops",
+          "level": 57,
+          "heldItem": null,
+          "ability": "Sharpness",
+          "moves": [
+            "Aqua Jet",
+            "Stone Axe",
+            "Aqua Cutter",
+            "Cross Poison"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Gyarados",
+          "level": 59,
+          "heldItem": "Gyaradosite",
+          "ability": "Intimidate",
+          "moves": [
+            "Dragon Dance",
+            "Aqua Tail",
+            "Crunch",
+            "Poison Fang"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Rhadine",
+      "location": "Ruins of Ahiyawa",
+      "levelCap": 58,
+      "trainerType": "Elite 4",
+      "items": "Red, 4x Yellow, Blue | 1x Full Restore, 1x Full Heal",
+      "pokemon": [
+        {
+          "name": "Oricorio Baile",
+          "level": 59,
+          "heldItem": "Focus Sash",
+          "ability": "Dancer",
+          "moves": [
+            "Quiver Dance",
+            "Revelation Dance",
+            "Petal Dance",
+            "Aqua Step"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Centiskorch",
+          "level": 58,
+          "heldItem": null,
+          "ability": "Flash Fire",
+          "moves": [
+            "Leech Life",
+            "Fire Lash",
+            "Lunge",
+            "Scald"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Simisear",
+          "level": 58,
+          "heldItem": null,
+          "ability": "Gluttony",
+          "moves": [
+            "Yawn",
+            "Flamethrower",
+            "Snarl",
+            "Headbutt"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Chatot",
+          "level": 58,
+          "heldItem": null,
+          "ability": "Keen Eye",
+          "moves": [
+            "Torch Song",
+            "Uproar",
+            "Snarl",
+            "Roost"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Togekiss",
+          "level": 58,
+          "heldItem": null,
+          "ability": "Serene Grace",
+          "moves": [
+            "Aura Sphere",
+            "Dazzling Gleam",
+            "Air Slash",
+            "Extrasensory"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Alolan Marowak",
+          "level": 58,
+          "heldItem": null,
+          "ability": "Cursed Body",
+          "moves": [
+            "Rock Blast",
+            "Raging Fury",
+            "Shadow Bone",
+            "Bone Rush"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Toucannon",
+          "level": 58,
+          "heldItem": null,
+          "ability": "Keen Eye",
+          "moves": [
+            "Beak Blast",
+            "Hyper Voice",
+            "Drill Peck",
+            "Flame Charge"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Pyroar♀",
+          "level": 58,
+          "heldItem": null,
+          "ability": "Moxie",
+          "moves": [
+            "Alluring Voice",
+            "Flamethrower",
+            "Hyper Voice",
+            "Dark Pulse"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Mandibuzz",
+          "level": 59,
+          "heldItem": "Mandibite",
+          "ability": "Regenerator",
+          "moves": [
+            "Leech Life",
+            "False Surrender",
+            "Drill Peck",
+            "Bonemerang"
+          ],
+          "isAce": false
+        }
+      ]
+    },
+    {
+      "name": "Anyalios",
+      "location": "Ruins of Ahiyawa",
+      "levelCap": 58,
+      "trainerType": "Champion",
+      "items": "Red, 4x Yellow, 1x Blue | 2x Full Restore",
+      "pokemon": [
+        {
+          "name": "Ceruledge",
+          "level": 60,
+          "heldItem": "Expert Belt",
+          "ability": "Flash Fire",
+          "moves": [
+            "Sacred Sword",
+            "Bitter Blade",
+            "Shadow Claw",
+            "Psycho Cut"
+          ],
+          "isAce": true
+        },
+        {
+          "name": "Tyrantrum",
+          "level": 59,
+          "heldItem": null,
+          "ability": "Strong Jaw",
+          "moves": [
+            "Crunch",
+            "Rock Slide",
+            "Dragon Claw",
+            "Earthquake"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Spiritomb",
+          "level": 59,
+          "heldItem": null,
+          "ability": "Pressure",
+          "moves": [
+            "Sucker Punch",
+            "Fiery Wrath",
+            "Dark Pulse",
+            "Memento"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Obstagoon",
+          "level": 59,
+          "heldItem": null,
+          "ability": "Reckless",
+          "moves": [
+            "Cross Chop",
+            "Night Slash",
+            "Double-Edge",
+            "Obstruct"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Alolan Muk",
+          "level": 59,
+          "heldItem": null,
+          "ability": "Poison Touch",
+          "moves": [
+            "Knock Off",
+            "Poison Fang",
+            "Crunch",
+            "Acid Armor"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Golisopod",
+          "level": 59,
+          "heldItem": null,
+          "ability": "Emergency Exit",
+          "moves": [
+            "Sucker Punch",
+            "First Impression",
+            "Liquidation",
+            "Flip Turn"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Scrafty",
+          "level": 59,
+          "heldItem": null,
+          "ability": "Rock Head",
+          "moves": [
+            "Head Smash",
+            "Crunch",
+            "Drain Punch",
+            "Stomping Tantrum"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Aegislash",
+          "level": 59,
+          "heldItem": "Sitrus Berry",
+          "ability": "Stance Change",
+          "moves": [
+            "Swords Dance",
+            "Iron Head",
+            "Phantom Force",
+            "King`s Shield"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Cyclizar",
+          "level": 60,
+          "heldItem": "Cyclizite S",
+          "ability": "Shed Skin",
+          "moves": [
+            "Crunch",
+            "Dragon Rush",
+            "Double-Edge",
+            "Collision Course"
+          ],
+          "isAce": false
+        },
+        {
+          "name": "Cyclizar",
+          "level": 60,
+          "heldItem": "Cyclizite V",
+          "ability": "Shed Skin",
+          "moves": [
+            "Crunch",
+            "Dragon Pulse",
+            "Double-Edge",
+            "Electro Drift"
+          ],
+          "isAce": false
+        }
+      ]
     }
   ]
 }
