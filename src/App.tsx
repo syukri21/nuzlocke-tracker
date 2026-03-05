@@ -61,7 +61,7 @@ const TypeIcon = ({ type, size = 'md', label = true }: { type: string; size?: 's
       style={{ backgroundColor: bg }}
       title={type}
     >
-      <img src={`/type-icons/${type}.svg`} alt="" className={cn("object-contain flex-shrink-0", iconSize)} />
+      <img src={`${import.meta.env.BASE_URL}type-icons/${type}.svg`} alt="" className={cn("object-contain flex-shrink-0", iconSize)} />
       {label && <span className={textSize}>{type}</span>}
     </span>
   );
