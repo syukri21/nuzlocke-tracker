@@ -59,7 +59,7 @@ export default function App() {
 
   useEffect(() => {
     if (!cacheReady) return;
-    const missing = [...state.box, ...state.graveyard]
+    const missing = [...state.party, ...state.box, ...state.graveyard]
       .map(loc => state.encounters[loc]?.pokemonName)
       .filter((name): name is string => !!name && !pokemonDataCache[name.toLowerCase()]);
 
@@ -67,7 +67,7 @@ export default function App() {
     Promise.all([...new Set(missing)].map(name => fetchPokemonData(name))).then(() => {
       forceUpdate(n => n + 1);
     });
-  }, [cacheReady, state.box, state.graveyard]);
+  }, [cacheReady, state.party, state.box, state.graveyard]);
 
   useEffect(() => {
     const onScroll = () => {
