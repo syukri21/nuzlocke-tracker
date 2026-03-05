@@ -1,6 +1,6 @@
 import { Sparkles, Skull } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { STATUS_COLOR_MAP } from '../constants/gameConstants';
+import { STATUS_COLOR_MAP, cap } from '../constants/gameConstants';
 import { TypeIcon } from './TypeIcon';
 
 interface PokemonData {
@@ -17,10 +17,6 @@ interface BoxGridItemProps {
   onEvolve: () => void;
   onMarkFainted: () => void;
   onOpenDetail: () => void;
-}
-
-function cap(s?: string) {
-  return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 }
 
 export function BoxGridItem({

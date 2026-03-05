@@ -1,15 +1,11 @@
 import { X, Ruler, Weight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DetailData } from '../types';
-import { STAT_COLORS, TYPE_BG, getTypeMatchups } from '../constants/gameConstants';
+import { STAT_COLORS, TYPE_BG, getTypeMatchups, cap } from '../constants/gameConstants';
 import { TypeIcon } from './TypeIcon';
 import moveTypesJson from '../data/move-types.json';
 
 const moveTypes = moveTypesJson as Record<string, string>;
-
-function cap(s?: string) {
-  return s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
-}
 
 interface DetailModalProps {
   detail: DetailData | null;
@@ -61,7 +57,7 @@ export function DetailModal({ detail, loading, onClose }: DetailModalProps) {
               {/* Name */}
               <div className="text-center mb-3">
                 {detail.nickname && (
-                  <div className="text-xl font-black text-white">{detail.nickname}</div>
+                  <div className="text-xl font-black text-white">{cap(detail.nickname)}</div>
                 )}
                 <div className={cn('font-bold text-gray-400', detail.nickname ? 'text-sm' : 'text-xl text-white')}>
                   {cap(detail.name)}

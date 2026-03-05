@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Skull } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { SNOWFLAKES, playSadMelody } from '../constants/gameConstants';
+import { SNOWFLAKES, playSadMelody, cap } from '../constants/gameConstants';
 
 interface GraveyardCardProps {
   locName: string;
@@ -62,11 +62,11 @@ export function GraveyardCard({ locName, enc, sprite }: GraveyardCardProps) {
         <div className="flex-1 min-w-0">
           {enc.nickname && (
             <div className={cn('text-base font-black truncate transition-colors duration-[2000ms]', tribute ? 'text-gray-500' : 'text-gray-300')}>
-              {enc.nickname}
+              {cap(enc.nickname)}
             </div>
           )}
           <div className={cn('font-bold truncate transition-colors duration-[2000ms]', enc.nickname ? 'text-xs text-gray-600' : 'text-sm text-gray-400')}>
-            {enc.pokemonName}
+            {cap(enc.pokemonName)}
           </div>
           <div className="text-[10px] text-gray-700 mt-0.5 truncate">First met at {locName}</div>
           {tribute && (

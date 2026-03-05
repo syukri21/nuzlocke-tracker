@@ -1,5 +1,13 @@
 import { CheckCircle2, Skull, CircleSlash, Copy, Gift, Sparkles } from 'lucide-react';
 
+// ── Text helpers ──────────────────────────────────────────────────────────────
+
+/** Capitalise the first letter of every word (space- or hyphen-separated). */
+export function cap(s?: string): string {
+  if (!s) return '';
+  return s.replace(/(^|[\s-])(\w)/g, (_, sep, c) => sep + c.toUpperCase());
+}
+
 // ── Status ────────────────────────────────────────────────────────────────────
 
 export const STATUS_ACTIONS = [

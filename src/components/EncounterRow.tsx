@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { Encounter } from '../types';
-import { STATUS_ACTIONS, STATUS_COLOR_MAP } from '../constants/gameConstants';
+import { STATUS_ACTIONS, STATUS_COLOR_MAP, cap } from '../constants/gameConstants';
 import { Pokeball } from './Pokeball';
 import { PokemonSelect } from './PokemonSelect';
 
@@ -52,7 +52,7 @@ export function EncounterRow({
           {hasPokemon && sprite ? (
             <img src={sprite} alt={enc.pokemonName} className="w-9 h-9 object-contain" />
           ) : hasPokemon ? (
-            <span className="text-[10px] text-gray-600 font-bold">{enc.pokemonName?.substring(0, 3)}</span>
+            <span className="text-[10px] text-gray-600 font-bold">{cap(enc.pokemonName)?.substring(0, 3)}</span>
           ) : (
             <Pokeball className="w-6 h-6 opacity-40" />
           )}
@@ -63,7 +63,7 @@ export function EncounterRow({
           {hasPokemon ? (
             <>
               <div className={cn('text-sm font-bold truncate', isMissed ? 'text-gray-500 line-through' : 'text-white')}>
-                {enc.nickname || enc.pokemonName}
+                {cap(enc.nickname || enc.pokemonName)}
               </div>
               <div className="text-[10px] text-gray-600 truncate">{locName}</div>
             </>
