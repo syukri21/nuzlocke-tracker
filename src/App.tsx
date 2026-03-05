@@ -27,14 +27,33 @@ const STATUS_COLOR_MAP: Record<string, { text: string; bg: string }> = {
   None: { text: 'text-gray-400', bg: 'bg-gray-500/20' },
 };
 
-const TypeIcon = ({ type, className = '' }: { type: string; className?: string }) => (
-  <img
-    src={`/type-icons/${type}.svg`}
-    alt={type}
-    title={type}
-    className={cn("object-contain", className)}
-  />
-);
+const TYPE_BG: Record<string, string> = {
+  normal: '#9099A1',   fire: '#FF9C54',    water: '#4D90D5',
+  electric: '#F3D23B', grass: '#63BB5B',   ice: '#74CEC0',
+  fighting: '#CE4069', poison: '#AB6AC8',  ground: '#D97845',
+  flying: '#8FA8DD',   psychic: '#F97176', bug: '#90C12C',
+  rock: '#C8B686',     ghost: '#5269AC',   dragon: '#0B6DC3',
+  dark: '#5A5366',     steel: '#5A8EA2',   fairy: '#EC8FE6',
+};
+
+const TypeIcon = ({ type, size = 'md', label = true }: { type: string; size?: 'sm' | 'md' | 'lg'; label?: boolean }) => {
+  const bg = TYPE_BG[type] || '#9099A1';
+  const dims = label
+    ? (size === 'sm' ? 'h-4 px-1.5 gap-1' : size === 'lg' ? 'h-7 px-2.5 gap-1.5' : 'h-5 px-2 gap-1')
+    : (size === 'sm' ? 'h-4 w-4' : size === 'lg' ? 'h-7 w-7' : 'h-5 w-5');
+  const iconSize = size === 'sm' ? 'h-2.5 w-2.5' : size === 'lg' ? 'h-4 w-4' : 'h-3 w-3';
+  const textSize = size === 'sm' ? 'text-[7px]' : size === 'lg' ? 'text-[11px]' : 'text-[9px]';
+  return (
+    <span
+      className={cn("inline-flex items-center justify-center rounded-full font-bold uppercase tracking-wide text-white", dims)}
+      style={{ backgroundColor: bg }}
+      title={type}
+    >
+      <img src={`/type-icons/${type}.svg`} alt="" className={cn("object-contain flex-shrink-0", iconSize)} />
+      {label && <span className={textSize}>{type}</span>}
+    </span>
+  );
+};
 
 const TYPE_COLORS: Record<string, string> = {
   normal: 'bg-gray-500',
@@ -419,7 +438,7 @@ export default function App() {
         {data?.types && data.types.length > 0 && (
           <div className="absolute top-2 left-2 z-20 flex flex-row gap-0.5">
             {data.types.map(type => (
-              <TypeIcon key={type} type={type} className="h-4 w-auto drop-shadow-sm" />
+              <TypeIcon key={type} type={type} size="sm" label={false} />
             ))}
           </div>
         )}
@@ -764,7 +783,7 @@ export default function App() {
                   {detailPokemon.types.length > 0 && (
                     <div className="flex justify-center gap-2 mb-5">
                       {detailPokemon.types.map(type => (
-                        <TypeIcon key={type} type={type} className="h-6 w-auto drop-shadow-md" />
+                        <TypeIcon key={type} type={type} size="lg" />
                       ))}
                     </div>
                   )}
@@ -840,7 +859,7 @@ export default function App() {
                               </div>
                               <div className="flex flex-wrap gap-1">
                                 {items.map(({ type }) => (
-                                  <TypeIcon key={type} type={type} className="h-4 w-auto drop-shadow-sm" />
+                                  <TypeIcon key={type} type={type} size="sm" />
                                 ))}
                               </div>
                             </div>
