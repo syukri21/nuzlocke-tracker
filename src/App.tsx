@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useRunStore } from './hooks/useRunStore';
 import locationsData from './data/locations.json';
@@ -286,6 +286,8 @@ export default function App() {
   const [activeSubTab, setActiveSubTab] = useState<'Nuzlocke' | 'Routes' | 'Bosses' | 'Upcoming'>('Nuzlocke');
   const [searchTerm, setSearchTerm] = useState('');
   const [editingLocations, setEditingLocations] = useState<Set<string>>(new Set());
+  const [navVisible, setNavVisible] = useState(true);
+  const lastScrollY = useRef(0);
   const [detailPokemon, setDetailPokemon] = useState<DetailData | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [cacheReady, setCacheReady] = useState(false);
@@ -324,6 +326,18 @@ export default function App() {
       forceUpdate(n => n + 1);
     });
   }, [cacheReady, state.box, state.graveyard]);
+
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      if (y < 10) { setNavVisible(true); }
+      else if (y > lastScrollY.current + 8) { setNavVisible(false); }
+      else if (y < lastScrollY.current - 8) { setNavVisible(true); }
+      lastScrollY.current = y;
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const toggleEditing = (locName: string) => {
     setEditingLocations(prev => {
@@ -1226,7 +1240,11 @@ export default function App() {
         )}
 
         {/* Fixed Mobile Bottom Navigation */}
-        <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[400px] bg-[#1a1a1a]/95 backdrop-blur-xl border-t border-white/5 flex justify-around p-2 z-[100] rounded-t-2xl pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
+        <div className={cn(
+          "fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[400px] bg-[#1a1a1a]/95 backdrop-blur-xl border-t border-white/5 flex justify-around p-2 z-[100] rounded-t-2xl pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.5)]",
+          "transition-transform duration-300 ease-in-out",
+          navVisible ? "translate-y-0" : "translate-y-full"
+        )}>
           <button
             onClick={() => setActiveMainTab('Game')}
             className={cn("flex flex-col items-center justify-center w-20 py-2 rounded-xl transition-all cursor-pointer", activeMainTab === 'Game' ? "text-white bg-white/5" : "text-gray-500 hover:text-gray-300")}
