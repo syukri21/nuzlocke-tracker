@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRunStore } from './hooks/useRunStore';
 import locationsData from './data/locations.json';
 import bossesData from './data/bosses.json';
+import moveTypes from './data/move-types.json';
 import { Skull, Package, Gamepad2, Search, Settings, Sun, ChevronRight, CheckCircle2, CircleSlash, Copy, Gift, Sparkles, Pencil, X, Ruler, Weight } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
@@ -948,11 +949,16 @@ export default function App() {
                     <div className="mb-5">
                       <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Moves</div>
                       <div className="grid grid-cols-2 gap-1.5">
-                        {detailPokemon.moves.map(move => (
-                          <span key={move} className="px-2.5 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-semibold text-gray-300 text-center">
-                            {move}
-                          </span>
-                        ))}
+                        {detailPokemon.moves.map(move => {
+                          const moveType = (moveTypes as Record<string, string>)[move] || 'normal';
+                          const bg = TYPE_BG[moveType] || '#9099A1';
+                          return (
+                            <div key={move} className="flex items-center gap-2 rounded-lg px-2.5 py-2 overflow-hidden" style={{ backgroundColor: `${bg}22`, border: `1px solid ${bg}44` }}>
+                              <TypeIcon type={moveType} size="sm" label={false} />
+                              <span className="text-[10px] font-semibold text-white leading-tight">{move}</span>
+                            </div>
+                          );
+                        })}
                       </div>
                     </div>
                   )}
