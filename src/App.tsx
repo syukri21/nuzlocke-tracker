@@ -140,6 +140,8 @@ interface DetailData {
   height: number;
   weight: number;
   evolutionLine?: string[];
+  moves?: string[];
+  heldItem?: string | null;
 }
 
 export default function App() {
@@ -284,6 +286,62 @@ export default function App() {
       setDetailLoading(false);
     }
   }, [state.encounters]);
+
+  const openBossDetail = useCallback(async (p: { name: string; level: number; heldItem: string | null; ability: string | null; moves: string[]; isAce: boolean; isLead: boolean }) => {
+    setDetailLoading(true);
+    setDetailPokemon(null);
+
+    const cached = pokemonDataCache[p.name.toLowerCase()];
+    if (cached) {
+      setDetailPokemon({
+        sprite: cached.sprite,
+        name: p.name,
+        types: cached.types || [],
+        stats: cached.stats,
+        abilities: p.ability ? [p.ability] : [],
+        height: 0,
+        weight: 0,
+        moves: p.moves,
+        heldItem: p.heldItem,
+      });
+      setDetailLoading(false);
+      return;
+    }
+
+    try {
+      const { formatSpecialNames } = await import('./components/PokemonSelect');
+      const formattedName = formatSpecialNames(p.name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'));
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${formattedName}`);
+      if (!res.ok) throw new Error('Not found');
+      const data = await res.json();
+      const STAT_NAME_MAP: Record<string, string> = { hp: 'HP', attack: 'ATTACK', defense: 'DEFENSE', 'special-attack': 'SP.ATTACK', 'special-defense': 'SP.DEFENSE', speed: 'SPEED' };
+      setDetailPokemon({
+        sprite: data.sprites?.other?.['official-artwork']?.front_default || data.sprites?.front_default || '',
+        name: p.name,
+        types: data.types.map((t: any) => t.type.name),
+        stats: data.stats.map((s: any) => ({ name: STAT_NAME_MAP[s.stat.name] || s.stat.name.toUpperCase(), value: s.base_stat })),
+        abilities: p.ability ? [p.ability] : data.abilities.map((a: any) => a.ability.name.replace(/-/g, ' ')),
+        height: data.height,
+        weight: data.weight,
+        moves: p.moves,
+        heldItem: p.heldItem,
+      });
+    } catch {
+      setDetailPokemon({
+        sprite: '',
+        name: p.name,
+        types: [],
+        stats: [],
+        abilities: p.ability ? [p.ability] : [],
+        height: 0,
+        weight: 0,
+        moves: p.moves,
+        heldItem: p.heldItem,
+      });
+    } finally {
+      setDetailLoading(false);
+    }
+  }, []);
 
   // Helper to capitalize first letter
   const cap = (s?: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
@@ -668,10 +726,12 @@ export default function App() {
                           {/* Pokemon team */}
                           <div className="px-3 pb-3 flex flex-wrap gap-2">
                             {boss.pokemon.map((p, i) => (
-                              <div key={i} className={cn(
-                                "flex flex-col items-center gap-0.5 rounded-lg px-1.5 py-1.5 min-w-[48px]",
-                                p.isAce ? "bg-yellow-500/10 border border-yellow-500/30" : "bg-black/30 border border-white/5"
-                              )}>
+                              <div key={i}
+                                onClick={() => openBossDetail(p)}
+                                className={cn(
+                                  "flex flex-col items-center gap-0.5 rounded-lg px-1.5 py-1.5 min-w-[48px] cursor-pointer active:scale-95 transition-transform",
+                                  p.isAce ? "bg-yellow-500/10 border border-yellow-500/30" : "bg-black/30 border border-white/5"
+                                )}>
                                 <div className="relative h-9 w-9 flex items-center justify-center">
                                   {bossSprites[p.name] ? (
                                     <img src={bossSprites[p.name]} alt={p.name} className="w-8 h-8 object-contain drop-shadow-md" />
@@ -867,6 +927,30 @@ export default function App() {
                         {detailPokemon.abilities.map(ability => (
                           <span key={ability} className="px-2.5 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-semibold text-gray-300 capitalize">
                             {ability}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Held Item */}
+                  {detailPokemon.heldItem && (
+                    <div className="mb-5">
+                      <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Held Item</div>
+                      <span className="px-2.5 py-1 bg-orange-500/10 border border-orange-500/20 rounded-lg text-[10px] font-semibold text-orange-300">
+                        {detailPokemon.heldItem}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Moves */}
+                  {detailPokemon.moves && detailPokemon.moves.length > 0 && (
+                    <div className="mb-5">
+                      <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Moves</div>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {detailPokemon.moves.map(move => (
+                          <span key={move} className="px-2.5 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-semibold text-gray-300 text-center">
+                            {move}
                           </span>
                         ))}
                       </div>
