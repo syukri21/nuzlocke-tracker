@@ -1,5 +1,6 @@
 import { cn } from '@/lib/utils';
 import { X, ArrowUpFromLine } from 'lucide-react';
+import { Pokeball } from './Pokeball';
 import { Encounter } from '../types';
 import { cap, getTypeMatchups, ALL_TYPES, TYPE_BG } from '../constants/gameConstants';
 import { TypeIcon } from './TypeIcon';
@@ -124,11 +125,20 @@ function MemberCard({ member, onRemove }: { member: PartyMember; onRemove: () =>
 
 function EmptySlot() {
   return (
-    <div className="bg-[#212121] rounded-2xl border border-dashed border-white/8 p-3 flex flex-col items-center justify-center min-h-[158px] gap-1.5">
-      <div className="w-8 h-8 rounded-full border border-dashed border-white/15 flex items-center justify-center">
-        <span className="text-white/20 text-lg font-black">+</span>
+    <div className="bg-[#1a1a1a] rounded-2xl border border-dashed border-white/10 p-3 flex flex-col items-center justify-center min-h-[158px] gap-2 relative overflow-hidden">
+      {/* Faint red half-circle backdrop — classic pokeball top half */}
+      <div className="absolute top-0 left-0 right-0 h-[55%] bg-gradient-to-b from-red-900/10 to-transparent rounded-t-2xl" />
+      <div className="absolute bottom-0 left-0 right-0 h-[45%] bg-gradient-to-t from-white/[0.02] to-transparent rounded-b-2xl" />
+      {/* Horizontal divider line */}
+      <div className="absolute left-4 right-4 top-1/2 -translate-y-1/2 h-px bg-white/6" />
+
+      {/* Pokeball */}
+      <div className="relative z-10">
+        <Pokeball className="w-12 h-12 opacity-20" />
       </div>
-      <span className="text-[9px] text-gray-700 font-bold uppercase tracking-widest">Empty</span>
+
+      {/* Label */}
+      <span className="relative z-10 text-[8px] text-white/15 font-black uppercase tracking-[0.2em]">No Pokémon</span>
     </div>
   );
 }
