@@ -80,3 +80,6 @@ App.tsx                        — state wiring, routing between tabs, evolution
 }
 ```
 Run `node scripts/generate-game-data.mjs` to regenerate this file from `src/data/locations.json` + `src/data/bosses.json`.
+
+## Commit Message Rules
+dont include co-author by cloude make it simple commit message
