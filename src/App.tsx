@@ -310,7 +310,19 @@ export default function App() {
         <header className="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-[#1a1a1a]/80 backdrop-blur-md sticky top-0 z-40">
           <div className="flex items-center gap-3">
             <div className="h-7 w-7 bg-red-500/20 text-red-500 rounded-lg flex items-center justify-center text-xs font-black uppercase italic shadow-[0_0_15px_rgba(239,68,68,0.2)]">P</div>
-            <h1 className="text-base font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">Pokemon Lazarus...</h1>
+            <div className="flex items-center gap-0.5">
+              {state.party.length === 0 ? (
+                <span className="text-xs text-gray-600 font-medium italic">No party yet</span>
+              ) : (
+                state.party.map(locName => {
+                  const enc = state.encounters[locName];
+                  const sprite = enc?.pokemonName ? spriteCache[enc.pokemonName.toLowerCase()] : null;
+                  return sprite ? (
+                    <img key={locName} src={sprite} alt={enc.pokemonName} className="w-8 h-8 object-contain drop-shadow" />
+                  ) : null;
+                })
+              )}
+            </div>
           </div>
           <div className="flex items-center gap-2">
             <button
