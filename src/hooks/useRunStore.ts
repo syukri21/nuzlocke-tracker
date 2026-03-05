@@ -22,15 +22,15 @@ export function useRunStore() {
 
   const updateEncounter = (locationName: string, encounter: Partial<Encounter>) => {
     setState(prev => {
-      const existing = prev.encounters[locationName] || { 
-        locationName, 
-        status: 'None', 
-        isPartyMember: false 
+      const existing = prev.encounters[locationName] || {
+        locationName,
+        status: 'None',
+        isPartyMember: false
       };
       const updated = { ...existing, ...encounter };
-      
+
       const newEncounters = { ...prev.encounters, [locationName]: updated };
-      
+
       // Update collections based on status
       let newParty = [...prev.party];
       let newBox = [...prev.box];
@@ -41,7 +41,7 @@ export function useRunStore() {
       newBox = newBox.filter(loc => loc !== locationName);
       newGraveyard = newGraveyard.filter(loc => loc !== locationName);
 
-      if (updated.status === 'Caught') {
+      if (updated.status === 'Caught' || updated.status === 'Gift' || updated.status === 'Shiny') {
         if (updated.isPartyMember) {
           newParty.push(locationName);
         } else {

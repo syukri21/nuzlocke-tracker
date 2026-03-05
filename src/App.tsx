@@ -282,6 +282,36 @@ export default function App() {
               </div>
             </div>
           )}
+
+          {activeMainTab === 'Box' && (
+            <div className="space-y-4">
+              <div className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2 mb-6">Boxed Pokemon</div>
+              {state.box.length > 0 ? (
+                state.box.map(locName => renderEncounterRow(locName))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-20 bg-[#212121] rounded-2xl border border-dashed border-white/10 opacity-50">
+                  <Package className="h-10 w-10 mb-3 text-gray-500" />
+                  <p className="text-sm font-medium text-gray-400">Your box is empty</p>
+                  <p className="text-[10px] text-gray-600 mt-1">Catch, Gift, or find Shiny Pokemon to fill it!</p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {activeMainTab === 'Grave' && (
+            <div className="space-y-4">
+              <div className="text-xs font-bold text-gray-500 uppercase tracking-widest pl-2 mb-6">Graveyard</div>
+              {state.graveyard.length > 0 ? (
+                state.graveyard.map(locName => renderEncounterRow(locName))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-20 bg-[#212121] rounded-2xl border border-dashed border-white/10 opacity-50">
+                  <Skull className="h-10 w-10 mb-3 text-gray-500" />
+                  <p className="text-sm font-medium text-gray-400">No fainted Pokemon yet</p>
+                  <p className="text-[10px] text-gray-600 mt-1">Keep it that way! Good luck!</p>
+                </div>
+              )}
+            </div>
+          )}
         </main>
 
         {/* Fixed Mobile Bottom Navigation */}
