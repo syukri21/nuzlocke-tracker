@@ -1,4 +1,5 @@
 import { cn } from '@/lib/utils';
+import { X, ArrowUpFromLine } from 'lucide-react';
 import { Encounter } from '../types';
 import { cap, getTypeMatchups, ALL_TYPES, TYPE_BG } from '../constants/gameConstants';
 import { TypeIcon } from './TypeIcon';
@@ -15,7 +16,10 @@ interface PartyMember {
 
 interface TeamBuilderProps {
   partyLocations: string[];
+  boxLocations: string[];
   encounters: Record<string, Encounter>;
+  onMoveToParty: (locName: string) => void;
+  onMoveToBox: (locName: string) => void;
 }
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -52,7 +56,7 @@ function getRelation(types: string[], attackType: string): Relation {
 
 // ── Member card ───────────────────────────────────────────────────────────────
 
-function MemberCard({ member }: { member: PartyMember }) {
+function MemberCard({ member, onRemove }: { member: PartyMember; onRemove: () => void }) {
   const { enc, locName } = member;
   const data  = pokemonDataCache[enc.pokemonName?.toLowerCase() ?? ''];
   const sprite = enc.pokemonName ? spriteCache[enc.pokemonName.toLowerCase()] : undefined;
@@ -61,6 +65,14 @@ function MemberCard({ member }: { member: PartyMember }) {
 
   return (
     <div className="bg-[#212121] rounded-2xl border border-white/5 p-3 shadow-lg relative overflow-hidden" style={{ backgroundColor: `color-mix(in srgb, ${bg} 30%, #212121)` }}>
+      {/* Remove button */}
+      <button
+        onClick={onRemove}
+        className="absolute top-2 right-2 w-5 h-5 rounded-full bg-white/5 hover:bg-red-500/20 flex items-center justify-center transition-colors z-10"
+        title="Move to Box"
+      >
+        <X className="w-2.5 h-2.5 text-gray-500 hover:text-red-400" />
+      </button>
       {/* Sprite + name row */}
       <div className="flex items-center gap-2 mb-2.5">
         <div className="flex-shrink-0 w-14 h-14 flex items-center justify-center">
@@ -256,12 +268,70 @@ function CoverageMatrix({ members }: { members: PartyMember[] }) {
   );
 }
 
+// ── Box pool row ──────────────────────────────────────────────────────────────
+
+function BoxPoolRow({ locName, enc, onAdd, partyFull }: {
+  locName: string;
+  enc: Encounter;
+  onAdd: () => void;
+  partyFull: boolean;
+}) {
+  const data   = pokemonDataCache[enc.pokemonName?.toLowerCase() ?? ''];
+  const sprite = enc.pokemonName ? spriteCache[enc.pokemonName.toLowerCase()] : undefined;
+
+  return (
+    <div className="flex items-center gap-3 bg-[#212121] rounded-xl border border-white/5 px-3 py-2.5">
+      {/* Sprite */}
+      <div className="w-10 h-10 flex-shrink-0 flex items-center justify-center">
+        {sprite
+          ? <img src={sprite} alt={enc.pokemonName} className="w-10 h-10 object-contain" />
+          : <div className="w-8 h-8 rounded-full bg-black/30 animate-pulse" />
+        }
+      </div>
+
+      {/* Name + types */}
+      <div className="flex-1 min-w-0">
+        <div className="text-[11px] font-black text-white truncate">{cap(enc.nickname || enc.pokemonName)}</div>
+        {enc.nickname && <div className="text-[9px] text-gray-600 truncate">{cap(enc.pokemonName)}</div>}
+        <div className="flex gap-0.5 mt-0.5">
+          {data?.types?.map(t => <TypeIcon key={t} type={t} size="sm" label={false} />) ?? null}
+        </div>
+      </div>
+
+      {/* BST */}
+      {data?.stats && (
+        <div className="text-right flex-shrink-0">
+          <div className="text-[8px] text-gray-600 font-bold">BST</div>
+          <div className="text-[10px] text-white font-black">{data.stats.reduce((s, st) => s + st.value, 0)}</div>
+        </div>
+      )}
+
+      {/* Add button */}
+      <button
+        onClick={onAdd}
+        disabled={partyFull}
+        className={cn(
+          'flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[9px] font-black transition-all',
+          partyFull
+            ? 'bg-white/5 text-gray-600 cursor-not-allowed'
+            : 'bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-400 border border-cyan-500/20 cursor-pointer active:scale-95'
+        )}
+      >
+        <ArrowUpFromLine className="w-3 h-3" />
+        {partyFull ? 'Full' : 'Party'}
+      </button>
+    </div>
+  );
+}
+
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function TeamBuilder({ partyLocations, encounters }: TeamBuilderProps) {
+export function TeamBuilder({ partyLocations, boxLocations, encounters, onMoveToParty, onMoveToBox }: TeamBuilderProps) {
   const members: PartyMember[] = partyLocations
     .map(locName => ({ locName, enc: encounters[locName] }))
     .filter(m => m.enc?.pokemonName) as PartyMember[];
+
+  const partyFull = members.length >= 6;
 
   return (
     <div className="space-y-6">
@@ -275,10 +345,35 @@ export function TeamBuilder({ partyLocations, encounters }: TeamBuilderProps) {
       <div className="grid grid-cols-2 gap-3">
         {Array.from({ length: 6 }).map((_, i) =>
           members[i]
-            ? <MemberCard key={members[i].locName} member={members[i]} />
+            ? <MemberCard key={members[i].locName} member={members[i]} onRemove={() => onMoveToBox(members[i].locName)} />
             : <EmptySlot key={`empty-${i}`} />
         )}
       </div>
+
+      {/* Box pool */}
+      {boxLocations.length > 0 && (
+        <>
+          <div className="flex items-center justify-between pl-1">
+            <div className="text-xs font-bold text-gray-500 uppercase tracking-widest">From Box</div>
+            <div className="text-[10px] font-bold text-gray-600 bg-white/5 px-2 py-0.5 rounded-full">{boxLocations.length}</div>
+          </div>
+          <div className="space-y-2">
+            {boxLocations.map(locName => {
+              const enc = encounters[locName];
+              if (!enc?.pokemonName) return null;
+              return (
+                <BoxPoolRow
+                  key={locName}
+                  locName={locName}
+                  enc={enc}
+                  onAdd={() => onMoveToParty(locName)}
+                  partyFull={partyFull}
+                />
+              );
+            })}
+          </div>
+        </>
+      )}
 
       {/* Coverage matrix header */}
       <div className="flex items-center justify-between pl-1">

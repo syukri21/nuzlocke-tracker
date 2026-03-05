@@ -18,7 +18,7 @@ import { DetailData, Encounter } from './types';
 // ── App ───────────────────────────────────────────────────────────────────────
 
 export default function App() {
-  const { state, updateEncounter, markFainted, resetRun } = useRunStore();
+  const { state, updateEncounter, markFainted, resetRun, moveToParty, moveToBox } = useRunStore();
   const { gameData, isCustom, importGameData, exportGameData, resetGameData } = useGameData();
 
   const [activeMainTab, setActiveMainTab] = useState<'Game' | 'Team' | 'Box' | 'Grave'>('Game');
@@ -649,7 +649,13 @@ export default function App() {
 
           {/* ── Team tab ────────────────────────────────────────────────────── */}
           {activeMainTab === 'Team' && (
-            <TeamBuilder partyLocations={state.party} encounters={state.encounters} />
+            <TeamBuilder
+              partyLocations={state.party}
+              boxLocations={state.box}
+              encounters={state.encounters}
+              onMoveToParty={moveToParty}
+              onMoveToBox={moveToBox}
+            />
           )}
 
           {/* ── Box tab ─────────────────────────────────────────────────────── */}
