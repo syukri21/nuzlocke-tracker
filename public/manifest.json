@@ -3,6 +3,7 @@
   "short_name": "Nuzlocke",
   "description": "Track your Pokémon Lazarus Nuzlocke run — encounters, box, graveyard and bosses.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#111111",
