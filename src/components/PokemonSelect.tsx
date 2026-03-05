@@ -21,33 +21,34 @@ export const pokemonDataCache: Record<string, PokemonData> = {};
 export const evolutionLineCache: Record<string, string[]> = {};
 export const spriteCache: Record<string, string> = {}; // Keep for backward compatibility if needed
 
-// Helper to handle edge cases in API names
+// Helper to handle edge cases in API names.
+// PokeAPI regional form convention: {name}-{region} (e.g. electrode-hisui, vulpix-alola)
+// but our data uses the prefix style: hisuian-electrode, alolan-vulpix, etc.
 export const formatSpecialNames = (name: string) => {
+  // True irregulars that don't follow any predictable pattern
   const specialCases: Record<string, string> = {
-    'mr-mime': 'mr-mime',
-    'mime-jr': 'mime-jr',
-    'nidoran-f': 'nidoran-f',
-    'nidoran-m': 'nidoran-m',
-    'farfetch-d': 'farfetchd',
-    'type-null': 'type-null',
-    'ho-oh': 'ho-oh',
-    'porygon-z': 'porygon-z',
-    'flabebe': 'flabebe',
-    'sirfetch-d': 'sirfetchd',
-    'mr-rime': 'mr-rime',
-    'basculin-white': 'basculin-white-striped',
-    'hisuian-zorua': 'zorua-hisui',
-    'hisuian-growlithe': 'growlithe-hisui',
-    'hisuian-voltorb': 'voltorb-hisui',
-    'hisuian-sliggoo': 'sliggoo-hisui',
-    'alolan-grimer': 'grimer-alola',
-    'alolan-sandshrew': 'sandshrew-alola',
-    'alolan-vulpix': 'vulpix-alola',
-    'paldean-tauros': 'tauros-paldea-combat-breed',
-    'mimikyu': 'mimikyu-disguised',
-    'exeggutor-alola': 'exeggutor-alola'
+    'farfetch-d':       'farfetchd',
+    'sirfetch-d':       'sirfetchd',
+    'basculin-white':   'basculin-white-striped',
+    'paldean-tauros':   'tauros-paldea-combat-breed',
+    'mimikyu':          'mimikyu-disguised',
+    'flabebe':          'flabebe',
   };
-  return specialCases[name] || name;
+
+  if (specialCases[name]) return specialCases[name];
+
+  // Regional prefix → suffix  (hisuian-x → x-hisui, alolan-x → x-alola, etc.)
+  const regional: [string, string][] = [
+    ['hisuian-', '-hisui'],
+    ['alolan-',  '-alola'],
+    ['galarian-','-galar'],
+    ['paldean-', '-paldea'],
+  ];
+  for (const [prefix, suffix] of regional) {
+    if (name.startsWith(prefix)) return name.slice(prefix.length) + suffix;
+  }
+
+  return name;
 };
 
 export const fetchPokemonData = async (name: string): Promise<PokemonData | null> => {
