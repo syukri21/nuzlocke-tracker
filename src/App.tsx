@@ -311,6 +311,7 @@ export default function App() {
   // After cache is ready, fetch data for any boxed/graveyard Pokemon not in the bundled cache
   // (e.g. evolutions like Jolteon that weren't in locations.json)
   const [, forceUpdate] = useState(0);
+  const [evolvingLocation, setEvolvingLocation] = useState<string | null>(null);
   useEffect(() => {
     if (!cacheReady) return;
     const missing = [...state.box, ...state.graveyard]
@@ -363,6 +364,34 @@ export default function App() {
     await fetchPokemonData(nextPokemon);
 
     updateEncounter(locName, { pokemonName: nextPokemon });
+  };
+
+  const handleEvolveWithEffect = async (locName: string) => {
+    const enc = state.encounters[locName];
+    if (!enc?.pokemonName || evolvingLocation) return;
+
+    // Start animation immediately
+    setEvolvingLocation(locName);
+    setTimeout(() => handleEvolve(locName), 1000);
+    setTimeout(() => setEvolvingLocation(null), 2400);
+
+    // Fetch cry URL from PokeAPI and play (fire-and-forget)
+    try {
+      const { formatSpecialNames } = await import('./components/PokemonSelect');
+      const formattedName = formatSpecialNames(
+        enc.pokemonName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-')
+      );
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${formattedName}`);
+      if (res.ok) {
+        const data = await res.json();
+        const cryUrl = data.cries?.latest || data.cries?.legacy;
+        if (cryUrl) {
+          const audio = new Audio(cryUrl);
+          audio.volume = 0.6;
+          audio.play().catch(() => {});
+        }
+      }
+    } catch { /* cry is optional, swallow errors */ }
   };
 
   const openPokemonDetail = useCallback(async (locName: string) => {
@@ -642,10 +671,19 @@ export default function App() {
           </div>
         )}
 
+        {/* Evolution flash overlay — card-scoped */}
+        {evolvingLocation === locName && (
+          <div className="absolute inset-0 z-30 pointer-events-none evolution-overlay rounded-2xl" />
+        )}
+
         {/* Sprite */}
         <div className="w-18 h-18 mb-1 relative z-10 flex items-center justify-center">
           {data?.sprite ? (
-            <img src={data.sprite} alt={enc.pokemonName} className="w-16 h-16 object-contain drop-shadow-xl group-hover:scale-105 transition-transform" />
+            <img
+              src={data.sprite}
+              alt={enc.pokemonName}
+              className={cn("w-16 h-16 object-contain drop-shadow-xl group-hover:scale-105 transition-transform", evolvingLocation === locName && "sprite-evolving")}
+            />
           ) : (
             <div className="w-16 h-16 rounded-full bg-black/20 animate-pulse" />
           )}
@@ -680,7 +718,7 @@ export default function App() {
         {/* Action Buttons */}
         <div className="w-full grid grid-cols-2 gap-1.5" onClick={e => e.stopPropagation()}>
           <button
-            onClick={(e) => { e.stopPropagation(); handleEvolve(locName); }}
+            onClick={(e) => { e.stopPropagation(); handleEvolveWithEffect(locName); }}
             className="flex items-center justify-center gap-1 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-cyan-400 transition-all cursor-pointer active:scale-95"
             title="Evolve"
           >

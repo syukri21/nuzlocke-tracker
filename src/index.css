@@ -39,6 +39,30 @@
   background-color: rgba(255, 255, 255, 0.05);
 }
 
+@keyframes evolutionFlash {
+  0%   { opacity: 0; }
+  20%  { opacity: 0; }
+  45%  { opacity: 0.75; }
+  65%  { opacity: 0.75; }
+  100% { opacity: 0; }
+}
+
+.evolution-overlay {
+  background: white;
+  animation: evolutionFlash 2.2s ease-in-out forwards;
+}
+
+@keyframes spriteFlash {
+  0%, 100% { filter: brightness(1); }
+  25%       { filter: brightness(10) saturate(0); }
+  50%       { filter: brightness(1); }
+  75%       { filter: brightness(10) saturate(0); }
+}
+
+.sprite-evolving {
+  animation: spriteFlash 0.5s ease-in-out 3;
+}
+
 @keyframes snowfall {
   0%   { transform: translateY(-20px) translateX(0px) rotate(0deg);   opacity: 0; }
   10%  { opacity: 0.8; }
