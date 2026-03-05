@@ -370,40 +370,60 @@ export default function App() {
     const enc = state.encounters[locName];
     if (!enc?.pokemonName || evolvingLocation) return;
 
-    // Start animation immediately
-    setEvolvingLocation(locName);
-    setTimeout(() => handleEvolve(locName), 1000);
-    setTimeout(() => setEvolvingLocation(null), 2400);
-
-    // Create AudioContext synchronously inside the click handler so Android
-    // Chrome keeps the user-gesture unlock even after awaits below.
+    // Must create AudioContext synchronously within the click handler so
+    // Android Chrome keeps the user-gesture unlock across all later awaits.
     const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
     const audioCtx: AudioContext = new AudioCtx();
 
-    // Fetch cry URL then stream-decode via AudioContext (works on Android Chrome)
+    // Work out the evolved Pokemon name (usually cached, fast)
+    let nextPokemonName: string | null = null;
     try {
-      const { formatSpecialNames } = await import('./components/PokemonSelect');
-      const formattedName = formatSpecialNames(
-        enc.pokemonName.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-')
-      );
-      const apiRes = await fetch(`https://pokeapi.co/api/v2/pokemon/${formattedName}`);
-      if (apiRes.ok) {
-        const data = await apiRes.json();
-        const cryUrl = data.cries?.latest || data.cries?.legacy;
-        if (cryUrl) {
-          const cryRes = await fetch(cryUrl);
-          const arrayBuffer = await cryRes.arrayBuffer();
-          const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-          const source = audioCtx.createBufferSource();
-          const gainNode = audioCtx.createGain();
-          gainNode.gain.value = 0.6;
-          source.buffer = audioBuffer;
-          source.connect(gainNode);
-          gainNode.connect(audioCtx.destination);
-          source.start();
-        }
+      let line = evolutionLineCache[enc.pokemonName.toLowerCase()];
+      if (!line) line = await fetchEvolutionLine(enc.pokemonName);
+      if (line.length > 1) {
+        const idx = line.indexOf(enc.pokemonName.toLowerCase());
+        nextPokemonName = line[(idx + 1) % line.length];
       }
-    } catch { /* cry is optional */ }
+    } catch { /* no evolution line */ }
+
+    // Start flash animation, swap Pokemon at peak white
+    setEvolvingLocation(locName);
+    setTimeout(() => handleEvolve(locName), 1000);
+
+    // Pre-fetch the evolved Pokemon's cry during the animation
+    let evolvedAudioBuffer: AudioBuffer | null = null;
+    if (nextPokemonName) {
+      try {
+        const { formatSpecialNames } = await import('./components/PokemonSelect');
+        const formattedName = formatSpecialNames(
+          nextPokemonName.replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-')
+        );
+        const apiRes = await fetch(`https://pokeapi.co/api/v2/pokemon/${formattedName}`);
+        if (apiRes.ok) {
+          const data = await apiRes.json();
+          const cryUrl = data.cries?.latest || data.cries?.legacy;
+          if (cryUrl) {
+            const cryRes = await fetch(cryUrl);
+            const arrayBuffer = await cryRes.arrayBuffer();
+            evolvedAudioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+          }
+        }
+      } catch { /* cry optional */ }
+    }
+
+    // After animation ends, play the evolved Pokemon's cry
+    setTimeout(() => {
+      setEvolvingLocation(null);
+      if (evolvedAudioBuffer) {
+        const source = audioCtx.createBufferSource();
+        const gain = audioCtx.createGain();
+        gain.gain.value = 0.6;
+        source.buffer = evolvedAudioBuffer;
+        source.connect(gain);
+        gain.connect(audioCtx.destination);
+        source.start();
+      }
+    }, 2200);
   };
 
   const openPokemonDetail = useCallback(async (locName: string) => {
