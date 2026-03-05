@@ -10,8 +10,13 @@ export interface PokemonSelectProps {
   options: EncounterOption[];
 }
 
-// Global cache for Pokemon sprites to avoid redundant API calls
-export const spriteCache: Record<string, string> = {};
+// Global cache for Pokemon data to avoid redundant API calls
+export interface PokemonData {
+  sprite: string;
+  stats: { name: string; value: number }[];
+}
+export const pokemonDataCache: Record<string, PokemonData> = {};
+export const spriteCache: Record<string, string> = {}; // Keep for backward compatibility if needed
 
 // Helper to handle edge cases in API names
 export const formatSpecialNames = (name: string) => {
@@ -42,23 +47,36 @@ export const formatSpecialNames = (name: string) => {
   return specialCases[name] || name;
 };
 
-export const fetchSpriteForName = async (name: string): Promise<string | null> => {
-  if (spriteCache[name]) return spriteCache[name];
+export const fetchPokemonData = async (name: string): Promise<PokemonData | null> => {
+  if (pokemonDataCache[name]) return pokemonDataCache[name];
   try {
     const formattedName = formatSpecialNames(name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'));
     const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${formattedName}`);
     if (res.ok) {
       const data = await res.json();
       const spriteUrl = data.sprites?.front_default;
+      const stats = data.stats.map((s: any) => ({
+        name: s.stat.name.replace('special-', 'sp.').toUpperCase(),
+        value: s.base_stat
+      }));
+
       if (spriteUrl) {
-        spriteCache[name] = spriteUrl;
-        return spriteUrl;
+        const pokemonData = { sprite: spriteUrl, stats };
+        pokemonDataCache[name] = pokemonData;
+        spriteCache[name] = spriteUrl; // Sync legacy cache
+        return pokemonData;
       }
     }
   } catch (e) {
-    console.error(`Failed to fetch sprite for ${name}`, e);
+    console.error(`Failed to fetch data for ${name}`, e);
   }
   return null;
+};
+
+// Legacy shim
+export const fetchSpriteForName = async (name: string): Promise<string | null> => {
+  const data = await fetchPokemonData(name);
+  return data?.sprite || null;
 };
 
 export function PokemonSelect({ value, onChange, options }: PokemonSelectProps) {
