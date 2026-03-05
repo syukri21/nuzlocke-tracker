@@ -757,6 +757,7 @@ export default function App() {
           detail={detailPokemon}
           loading={detailLoading}
           onClose={() => setDetailPokemon(null)}
+          bosses={gameData.bosses}
         />
 
         {/* ── Bottom nav ───────────────────────────────────────────────────── */}

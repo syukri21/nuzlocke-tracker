@@ -31,6 +31,25 @@ export interface Boss {
   keyPokemon: string[];
 }
 
+export interface BossPokemon {
+  name: string;
+  level: number;
+  heldItem: string | null;
+  ability: string | null;
+  moves: string[];
+  isLead: boolean;
+  isAce: boolean;
+}
+
+export interface BossEntry {
+  name: string;
+  location: string;
+  levelCap: number;
+  trainerType: string;
+  items?: string;
+  pokemon: BossPokemon[];
+}
+
 export interface DetailData {
   sprite: string;
   name: string;
