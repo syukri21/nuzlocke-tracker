@@ -6,6 +6,7 @@ import { Skull, Package, Gamepad2, Search, Settings, Sun, ChevronRight, CheckCir
 import { cn } from "@/lib/utils";
 
 import { PokemonSelect, fetchSpriteForName, spriteCache, pokemonDataCache, fetchPokemonData, evolutionLineCache, fetchEvolutionLine } from './components/PokemonSelect';
+import { initPokemonCache } from './lib/initPokemonCache';
 
 const STATUS_ACTIONS = [
   { key: 'Caught', icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/15 border-emerald-500/20', activeBg: 'bg-emerald-500/30', label: 'Catch' },
@@ -76,38 +77,27 @@ export default function App() {
   const [editingLocations, setEditingLocations] = useState<Set<string>>(new Set());
   const [detailPokemon, setDetailPokemon] = useState<DetailData | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [cacheReady, setCacheReady] = useState(false);
 
   // State to hold boss sprites once fetched
   const [bossSprites, setBossSprites] = useState<Record<string, string>>({});
 
-  // Fetch boss sprites on mount
+  // Initialize Pokemon cache from localStorage / bundled JSON on startup
   useEffect(() => {
-    const fetchBossSprites = async () => {
-      const allBossPokemon = new Set<string>();
-      bossesData.bosses.forEach(boss => boss.keyPokemon.forEach(p => allBossPokemon.add(p)));
-
+    initPokemonCache().then(() => {
+      setCacheReady(true);
+      // After cache is ready, populate boss sprites from cache (keys are lowercase)
       const newSprites: Record<string, string> = {};
-      for (const p of allBossPokemon) {
-        const url = await fetchSpriteForName(p);
-        if (url) newSprites[p] = url;
-      }
+      bossesData.bosses.forEach(boss => {
+        boss.keyPokemon.forEach(p => {
+          const cached = pokemonDataCache[p.toLowerCase()];
+          if (cached?.sprite) newSprites[p] = cached.sprite;
+          else newSprites[p] = pokemonDataCache[p]?.sprite || '';
+        });
+      });
       setBossSprites(newSprites);
-    };
-    fetchBossSprites();
+    });
   }, []);
-
-  // Fetch sprites and stats for all encounters periodically to ensure cache is warm
-  useEffect(() => {
-    const warmCache = async () => {
-      for (const locName of Object.keys(state.encounters)) {
-        const enc = state.encounters[locName];
-        if (enc.pokemonName && !pokemonDataCache[enc.pokemonName]) {
-          await fetchPokemonData(enc.pokemonName);
-        }
-      }
-    };
-    warmCache();
-  }, [state.encounters]);
 
   const toggleEditing = (locName: string) => {
     setEditingLocations(prev => {
@@ -408,6 +398,26 @@ export default function App() {
       </div>
     );
   };
+
+  if (!cacheReady) {
+    return (
+      <div className="min-h-screen bg-[#141414] flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="relative w-16 h-16">
+            <div className="absolute inset-0 rounded-full border-2 border-white/5" />
+            <div className="absolute inset-0 rounded-full border-t-2 border-red-500 animate-spin" />
+            <div className="absolute inset-2 rounded-full bg-red-500/10 flex items-center justify-center">
+              <span className="text-red-500 text-xs font-black italic">P</span>
+            </div>
+          </div>
+          <div className="text-center">
+            <p className="text-sm font-bold text-white">Loading Pokédex data...</p>
+            <p className="text-[10px] text-gray-500 mt-1">This only happens once</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-black flex justify-center">
