@@ -567,10 +567,7 @@ export default function App() {
 
         {/* Pokemon Detail Modal */}
         {(detailPokemon || detailLoading) && (
-          <div
-            className="fixed inset-0 z-[200] flex items-end justify-center"
-            style={{ maxWidth: '400px', left: '50%', transform: 'translateX(-50%)' }}
-          >
+          <div className="fixed inset-0 z-[200] flex items-end justify-center">
             {/* Backdrop */}
             <div
               className="absolute inset-0 bg-black/70 backdrop-blur-sm"
@@ -579,6 +576,7 @@ export default function App() {
 
             {/* Sheet */}
             <div className="relative w-full bg-[#1a1a1a] rounded-t-3xl border-t border-white/10 shadow-2xl pb-10 max-h-[85vh] overflow-y-auto styled-scrollbar">
+              <div className="w-full max-w-[400px] mx-auto relative">
               {/* Handle */}
               <div className="flex justify-center pt-3 pb-2">
                 <div className="w-10 h-1 bg-white/20 rounded-full" />
@@ -676,6 +674,7 @@ export default function App() {
                   )}
                 </div>
               )}
+              </div>{/* end max-w inner */}
             </div>
           </div>
         )}
