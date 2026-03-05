@@ -27,6 +27,15 @@ const STATUS_COLOR_MAP: Record<string, { text: string; bg: string }> = {
   None: { text: 'text-gray-400', bg: 'bg-gray-500/20' },
 };
 
+const TypeIcon = ({ type, className = '' }: { type: string; className?: string }) => (
+  <img
+    src={`/type-icons/${type}.svg`}
+    alt={type}
+    title={type}
+    className={cn("object-contain", className)}
+  />
+);
+
 const TYPE_COLORS: Record<string, string> = {
   normal: 'bg-gray-500',
   fire: 'bg-orange-500',
@@ -47,6 +56,51 @@ const TYPE_COLORS: Record<string, string> = {
   steel: 'bg-slate-400',
   fairy: 'bg-pink-400',
 };
+
+// Defender-centric type chart: for each type, what attacking types are weak/resist/immune
+const DEFENDER_CHART: Record<string, { weak: string[]; resist: string[]; immune: string[] }> = {
+  normal:   { weak: ['fighting'], resist: [], immune: ['ghost'] },
+  fire:     { weak: ['water', 'ground', 'rock'], resist: ['fire', 'grass', 'ice', 'bug', 'steel', 'fairy'], immune: [] },
+  water:    { weak: ['electric', 'grass'], resist: ['fire', 'water', 'ice', 'steel'], immune: [] },
+  electric: { weak: ['ground'], resist: ['electric', 'flying', 'steel'], immune: [] },
+  grass:    { weak: ['fire', 'ice', 'poison', 'flying', 'bug'], resist: ['water', 'electric', 'grass', 'ground'], immune: [] },
+  ice:      { weak: ['fire', 'fighting', 'rock', 'steel'], resist: ['ice'], immune: [] },
+  fighting: { weak: ['flying', 'psychic', 'fairy'], resist: ['bug', 'rock', 'dark'], immune: [] },
+  poison:   { weak: ['ground', 'psychic'], resist: ['grass', 'fighting', 'poison', 'bug', 'fairy'], immune: [] },
+  ground:   { weak: ['water', 'grass', 'ice'], resist: ['poison', 'rock'], immune: ['electric'] },
+  flying:   { weak: ['electric', 'ice', 'rock'], resist: ['grass', 'fighting', 'bug'], immune: ['ground'] },
+  psychic:  { weak: ['bug', 'ghost', 'dark'], resist: ['fighting', 'psychic'], immune: [] },
+  bug:      { weak: ['fire', 'flying', 'rock'], resist: ['grass', 'fighting', 'ground'], immune: [] },
+  rock:     { weak: ['water', 'grass', 'fighting', 'ground', 'steel'], resist: ['normal', 'fire', 'poison', 'flying'], immune: [] },
+  ghost:    { weak: ['ghost', 'dark'], resist: ['poison', 'bug'], immune: ['normal', 'fighting'] },
+  dragon:   { weak: ['ice', 'dragon', 'fairy'], resist: ['fire', 'water', 'electric', 'grass'], immune: [] },
+  dark:     { weak: ['fighting', 'bug', 'fairy'], resist: ['ghost', 'dark'], immune: ['psychic'] },
+  steel:    { weak: ['fire', 'fighting', 'ground'], resist: ['normal', 'grass', 'ice', 'flying', 'psychic', 'bug', 'rock', 'dragon', 'steel', 'fairy'], immune: ['poison'] },
+  fairy:    { weak: ['poison', 'steel'], resist: ['fighting', 'bug', 'dark'], immune: ['dragon'] },
+};
+
+const ALL_TYPES = ['normal','fire','water','electric','grass','ice','fighting','poison','ground','flying','psychic','bug','rock','ghost','dragon','dark','steel','fairy'];
+
+function getTypeMatchups(types: string[]) {
+  const all = ALL_TYPES.map(attackType => {
+    const mult = types.reduce((acc, defType) => {
+      const chart = DEFENDER_CHART[defType];
+      if (!chart) return acc;
+      if (chart.immune.includes(attackType)) return acc * 0;
+      if (chart.weak.includes(attackType)) return acc * 2;
+      if (chart.resist.includes(attackType)) return acc * 0.5;
+      return acc;
+    }, 1);
+    return { type: attackType, multiplier: mult };
+  });
+  return {
+    superWeak:   all.filter(t => t.multiplier === 4),
+    weak:        all.filter(t => t.multiplier === 2),
+    resist:      all.filter(t => t.multiplier === 0.5),
+    superResist: all.filter(t => t.multiplier === 0.25),
+    immune:      all.filter(t => t.multiplier === 0),
+  };
+}
 
 const STAT_COLORS: Record<string, string> = {
   HP: 'bg-red-500',
@@ -70,7 +124,7 @@ interface DetailData {
 }
 
 export default function App() {
-  const { state, updateEncounter } = useRunStore();
+  const { state, updateEncounter, markFainted } = useRunStore();
   const [activeMainTab, setActiveMainTab] = useState<'Game' | 'Box' | 'Grave'>('Game');
   const [activeSubTab, setActiveSubTab] = useState<'Nuzlocke' | 'Routes' | 'Bosses' | 'Upcoming'>('Nuzlocke');
   const [searchTerm, setSearchTerm] = useState('');
@@ -234,10 +288,23 @@ export default function App() {
     // ── Compact View Mode ──
     if (isCompleted && !isEditing) {
       const statusStyle = STATUS_COLOR_MAP[enc.status] || STATUS_COLOR_MAP.None;
+      const isMissed = enc.status === 'Missed';
       return (
-        <div key={locName} className="bg-[#212121] rounded-xl border border-white/5 px-3 py-2.5 mb-3 last:mb-0 shadow-md flex items-center gap-3">
+        <div key={locName} className={cn(
+          "relative bg-[#212121] rounded-xl border px-3 py-2.5 mb-3 last:mb-0 shadow-md flex items-center gap-3 overflow-hidden",
+          isMissed ? "border-white/5 opacity-50" : "border-white/5"
+        )}>
+          {/* Diagonal strikethrough overlay for Missed */}
+          {isMissed && (
+            <div className="absolute inset-0 pointer-events-none z-10">
+              <svg className="w-full h-full" preserveAspectRatio="none">
+                <line x1="0" y1="50%" x2="100%" y2="50%" stroke="rgba(255,255,255,0.25)" strokeWidth="1.5" strokeDasharray="4 3" />
+              </svg>
+            </div>
+          )}
+
           {/* Sprite */}
-          <div className="w-10 h-10 rounded-lg bg-black/30 border border-white/5 flex items-center justify-center flex-shrink-0 overflow-hidden">
+          <div className={cn("w-10 h-10 rounded-lg bg-black/30 border border-white/5 flex items-center justify-center flex-shrink-0 overflow-hidden", isMissed && "grayscale")}>
             {selectedSprite ? (
               <img src={selectedSprite} alt={enc.pokemonName} className="w-9 h-9 object-contain" />
             ) : (
@@ -247,8 +314,8 @@ export default function App() {
 
           {/* Name + Location */}
           <div className="flex-1 min-w-0">
-            <div className="text-sm font-bold text-white truncate">{enc.nickname || enc.pokemonName}</div>
-            <div className="text-[10px] text-gray-500 truncate">{locName}</div>
+            <div className={cn("text-sm font-bold truncate", isMissed ? "text-gray-500 line-through" : "text-white")}>{enc.nickname || enc.pokemonName}</div>
+            <div className="text-[10px] text-gray-600 truncate">{locName}</div>
           </div>
 
           {/* Status Badge */}
@@ -259,7 +326,7 @@ export default function App() {
           {/* Edit Button */}
           <button
             onClick={() => toggleEditing(locName)}
-            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors flex-shrink-0 cursor-pointer"
+            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors flex-shrink-0 cursor-pointer relative z-20"
           >
             <Pencil className="h-3.5 w-3.5 text-gray-400" />
           </button>
@@ -348,18 +415,11 @@ export default function App() {
         {/* Background Decorative Type Glow (Simplified to status color) */}
         <div className={cn("absolute -top-12 -right-12 w-24 h-24 rounded-full blur-3xl opacity-20", statusStyle.bg)} />
 
-        {/* Status Badge Overlay (Top Left) */}
-        <div className={cn("absolute top-2 left-2 z-20 px-1.5 py-0.5 rounded-md text-[7px] font-black uppercase tracking-wider border border-white/10 shadow-sm", statusStyle.bg, statusStyle.text)}>
-          {enc.status === 'Caught' ? 'Boxed' : enc.status}
-        </div>
-
-        {/* Type Badges Overlay (Top Right) */}
+        {/* Type Badges Overlay (Top, horizontal) */}
         {data?.types && data.types.length > 0 && (
-          <div className="absolute top-2 right-2 z-20 flex flex-col gap-0.5 items-end">
+          <div className="absolute top-2 left-2 z-20 flex flex-row gap-0.5">
             {data.types.map(type => (
-              <span key={type} className={cn("px-1.5 py-0.5 rounded text-[7px] font-black uppercase text-white tracking-wide shadow-sm", TYPE_COLORS[type] || 'bg-gray-600')}>
-                {type}
-              </span>
+              <TypeIcon key={type} type={type} className="h-4 w-auto drop-shadow-sm" />
             ))}
           </div>
         )}
@@ -373,23 +433,12 @@ export default function App() {
           )}
         </div>
 
-        {/* Info + Evolve Button */}
-        <div className="text-center w-full mb-1.5">
-          <div className="flex items-center justify-center gap-1.5 px-1 translate-x-3">
-            <div className="text-[11px] font-black text-white truncate max-w-[80%]">{enc.nickname || cap(enc.pokemonName)}</div>
-            <button
-              onClick={(e) => { e.stopPropagation(); handleEvolve(locName); }}
-              className="p-1 rounded-md bg-white/5 hover:bg-white/10 text-cyan-400 group-hover:scale-110 transition-all cursor-pointer shadow-sm active:scale-90"
-              title="Evolve"
-            >
-              <Sparkles className="h-3 w-3" />
-            </button>
-          </div>
-          <div className="text-[8px] text-gray-500 font-bold uppercase tracking-tighter truncate opacity-70 mt-0.5">
-            {cap(enc.pokemonName)}
+        {/* Name */}
+        <div className="text-center w-full mb-0.5 px-1">
+          <div className="text-[10px] font-black text-white truncate">
+            {enc.nickname ? <>{enc.nickname} <span className="text-gray-500 font-medium">- {cap(enc.pokemonName)}</span></> : cap(enc.pokemonName)}
           </div>
         </div>
-
 
         {/* Location */}
         <div className="w-full text-center mb-1.5">
@@ -397,7 +446,7 @@ export default function App() {
         </div>
 
         {/* Stats Grid */}
-        <div className="w-full grid grid-cols-3 gap-1 mb-1">
+        <div className="w-full grid grid-cols-3 gap-1 mb-2">
           {topStats.length > 0 ? (
             topStats.map(stat => (
               <div key={stat.name} className="bg-black/40 rounded-md py-1 px-0.5 flex flex-col items-center border border-white/5">
@@ -408,6 +457,26 @@ export default function App() {
           ) : (
             <div className="col-span-3 h-5" />
           )}
+        </div>
+
+        {/* Action Buttons */}
+        <div className="w-full grid grid-cols-2 gap-1.5" onClick={e => e.stopPropagation()}>
+          <button
+            onClick={(e) => { e.stopPropagation(); handleEvolve(locName); }}
+            className="flex items-center justify-center gap-1 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-cyan-400 transition-all cursor-pointer active:scale-95"
+            title="Evolve"
+          >
+            <Sparkles className="h-3 w-3" />
+            <span className="text-[8px] font-bold">Evolve</span>
+          </button>
+          <button
+            onClick={(e) => { e.stopPropagation(); markFainted(locName); }}
+            className="flex items-center justify-center gap-1 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/25 text-red-400 transition-all cursor-pointer active:scale-95"
+            title="Send to Graveyard"
+          >
+            <Skull className="h-3 w-3" />
+            <span className="text-[8px] font-bold">Dead</span>
+          </button>
         </div>
       </div>
     );
@@ -695,9 +764,7 @@ export default function App() {
                   {detailPokemon.types.length > 0 && (
                     <div className="flex justify-center gap-2 mb-5">
                       {detailPokemon.types.map(type => (
-                        <span key={type} className={cn("px-3 py-1 rounded-full text-[10px] font-black uppercase text-white tracking-wider", TYPE_COLORS[type] || 'bg-gray-600')}>
-                          {type}
-                        </span>
+                        <TypeIcon key={type} type={type} className="h-6 w-auto drop-shadow-md" />
                       ))}
                     </div>
                   )}
@@ -737,7 +804,7 @@ export default function App() {
 
                   {/* Abilities */}
                   {detailPokemon.abilities.length > 0 && (
-                    <div>
+                    <div className="mb-5">
                       <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Abilities</div>
                       <div className="flex flex-wrap gap-2">
                         {detailPokemon.abilities.map(ability => (
@@ -748,6 +815,40 @@ export default function App() {
                       </div>
                     </div>
                   )}
+
+                  {/* Type Matchups */}
+                  {detailPokemon.types.length > 0 && (() => {
+                    const { superWeak, weak, resist, superResist, immune } = getTypeMatchups(detailPokemon.types);
+                    const rows = [
+                      { label: 'Super Weak', items: superWeak, badge: '4×', labelColor: 'text-red-400' },
+                      { label: 'Weak', items: weak, badge: '2×', labelColor: 'text-orange-400' },
+                      { label: 'Resist', items: resist, badge: '½×', labelColor: 'text-blue-400' },
+                      { label: 'Super Resist', items: superResist, badge: '¼×', labelColor: 'text-cyan-400' },
+                      { label: 'Immune', items: immune, badge: '0×', labelColor: 'text-gray-400' },
+                    ].filter(r => r.items.length > 0);
+
+                    if (rows.length === 0) return null;
+                    return (
+                      <div>
+                        <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Type Matchups</div>
+                        <div className="space-y-2">
+                          {rows.map(({ label, items, badge, labelColor }) => (
+                            <div key={label} className="flex items-start gap-2">
+                              <div className="flex items-center gap-1 min-w-[72px] pt-0.5">
+                                <span className={cn("text-[8px] font-black", labelColor)}>{badge}</span>
+                                <span className="text-[8px] text-gray-600 font-bold">{label}</span>
+                              </div>
+                              <div className="flex flex-wrap gap-1">
+                                {items.map(({ type }) => (
+                                  <TypeIcon key={type} type={type} className="h-4 w-auto drop-shadow-sm" />
+                                ))}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               )}
               </div>{/* end max-w inner */}

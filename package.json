@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite --host 0.0.0.0 preview",
-    "scrape": "node scripts/scrape-pokemon.mjs"
+    "scrape": "node scripts/scrape-pokemon.mjs",
+    "download-type-icons": "node scripts/download-type-icons.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.15",
