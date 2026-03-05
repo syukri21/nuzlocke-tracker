@@ -1,0 +1,48 @@
+Acrisia City    Starter, Species Quest
+Acrisia City
+Bronze Fields    North
+Bronze Fields    South
+Jusmail Town
+Acrisia Mountains
+Acrisia Mountains    Cave
+Acrisia Mountains    Peak
+Riverwalk Trail    West
+Riverwalk Trail    South
+Kalami City
+Wanderer`s Woods    Shiny Egg after Admin
+Wanderer`s Woods    North
+Wanderer`s Woods    South
+Pythios Town
+Pythios Cemetery
+Erinys Path    West
+Erinys Path    East
+Froslass Cavern
+Asfal Hills
+Sofos City    Satyr`s Lair
+Sofos City    Acropolis Temple
+Sofos City
+Kipos Town
+Lastlight Road
+Sea of Asteri    West
+Marmaro Island
+Sea of Asteri    East
+Myrrini Island
+Myrrini Island    Blue
+Péntepetal City
+Sea of Vulcai
+Fresco Isles
+Palati City
+Kaptara Island    West
+Kaptara Island    East
+Tower of Dioxippus    3F
+Tower of Dioxippus
+Corrin Crossing
+Port Pello
+Port Pello    Red?
+The Nyx Trails
+Areios Hideout
+Pollen Road
+Pollen Road    Red
+Pollen Road    Yellow
+Davosi Straits
+Wakewater Isle

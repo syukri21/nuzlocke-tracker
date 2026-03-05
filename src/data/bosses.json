@@ -1,0 +1,40 @@
+{
+  "bosses": [
+    {
+      "name": "Polymnia",
+      "location": "Acrisia City (Surf)",
+      "levelCap": 12,
+      "keyPokemon": ["Cutiefly", "Skiddo"]
+    },
+    {
+      "name": "Rania",
+      "location": "Jusmail Town",
+      "levelCap": 12,
+      "keyPokemon": ["Buizel", "Vulpix", "Bellsprout"]
+    },
+    {
+      "name": "Chimera Admin (Bronze North)",
+      "location": "Bronze Fields North",
+      "levelCap": 18,
+      "keyPokemon": ["Magnemite", "Tauros"]
+    },
+    {
+      "name": "Ourani",
+      "location": "Kalami Gym",
+      "levelCap": 19,
+      "keyPokemon": ["Klawf", "Larvitar"]
+    },
+    {
+      "name": "Chimera Admin (Erinys)",
+      "location": "Erinys Path West",
+      "levelCap": 20,
+      "keyPokemon": ["Basculin White", "Paldean Tauros"]
+    },
+    {
+      "name": "Kleio",
+      "location": "Bronze Fields South",
+      "levelCap": 22,
+      "keyPokemon": ["Hisuian Zorua", "Mimikyu"]
+    }
+  ]
+}
