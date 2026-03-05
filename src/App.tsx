@@ -37,6 +37,16 @@ const TYPE_BG: Record<string, string> = {
   dark: '#5A5366',     steel: '#5A8EA2',   fairy: '#EC8FE6',
 };
 
+const Pokeball = ({ className }: { className?: string }) => (
+  <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="47" stroke="rgba(255,255,255,0.15)" strokeWidth="3"/>
+    <path d="M3 50 A47 47 0 0 1 97 50" fill="rgba(220,50,50,0.5)"/>
+    <path d="M3 50 A47 47 0 0 0 97 50" fill="rgba(255,255,255,0.07)"/>
+    <line x1="3" y1="50" x2="97" y2="50" stroke="rgba(255,255,255,0.15)" strokeWidth="3"/>
+    <circle cx="50" cy="50" r="11" fill="#1a1a1a" stroke="rgba(255,255,255,0.15)" strokeWidth="3"/>
+  </svg>
+);
+
 const TypeIcon = ({ type, size = 'md', label = true }: { type: string; size?: 'sm' | 'md' | 'lg'; label?: boolean }) => {
   const bg = TYPE_BG[type] || '#9099A1';
   const dims = label
@@ -360,19 +370,22 @@ export default function App() {
     const availablePokemon = Array.from(availablePokemonSet.values());
 
     const selectedSprite = enc.pokemonName ? spriteCache[enc.pokemonName.toLowerCase()] : null;
-    const isCompleted = enc.status !== 'None' && enc.pokemonName;
     const isEditing = editingLocations.has(locName);
+    const hasPokemon = !!enc.pokemonName;
+    const isMissed = enc.status === 'Missed';
+    const statusStyle = STATUS_COLOR_MAP[enc.status] || STATUS_COLOR_MAP.None;
 
-    // ── Compact View Mode ──
-    if (isCompleted && !isEditing) {
-      const statusStyle = STATUS_COLOR_MAP[enc.status] || STATUS_COLOR_MAP.None;
-      const isMissed = enc.status === 'Missed';
+    // ── Collapsed View (default) ──
+    if (!isEditing) {
       return (
-        <div key={locName} className={cn(
-          "relative bg-[#212121] rounded-xl border px-3 py-2.5 mb-3 last:mb-0 shadow-md flex items-center gap-3 overflow-hidden",
-          isMissed ? "border-white/5 opacity-50" : "border-white/5"
-        )}>
-          {/* Diagonal strikethrough overlay for Missed */}
+        <div
+          key={locName}
+          onClick={() => toggleEditing(locName)}
+          className={cn(
+            "relative bg-[#212121] rounded-xl border px-3 py-2.5 mb-3 last:mb-0 shadow-md flex items-center gap-3 overflow-hidden cursor-pointer active:scale-[0.99] transition-transform",
+            isMissed ? "border-white/5 opacity-50" : "border-white/5"
+          )}
+        >
           {isMissed && (
             <div className="absolute inset-0 pointer-events-none z-10">
               <svg className="w-full h-full" preserveAspectRatio="none">
@@ -381,51 +394,53 @@ export default function App() {
             </div>
           )}
 
-          {/* Sprite */}
+          {/* Sprite or Pokeball */}
           <div className={cn("w-10 h-10 rounded-lg bg-black/30 border border-white/5 flex items-center justify-center flex-shrink-0 overflow-hidden", isMissed && "grayscale")}>
-            {selectedSprite ? (
+            {hasPokemon && selectedSprite ? (
               <img src={selectedSprite} alt={enc.pokemonName} className="w-9 h-9 object-contain" />
-            ) : (
+            ) : hasPokemon ? (
               <span className="text-[10px] text-gray-600 font-bold">{enc.pokemonName?.substring(0, 3)}</span>
+            ) : (
+              <Pokeball className="w-6 h-6 opacity-40" />
             )}
           </div>
 
-          {/* Name + Location */}
+          {/* Name + sublabel */}
           <div className="flex-1 min-w-0">
-            <div className={cn("text-sm font-bold truncate", isMissed ? "text-gray-500 line-through" : "text-white")}>{enc.nickname || enc.pokemonName}</div>
-            <div className="text-[10px] text-gray-600 truncate">{locName}</div>
+            {hasPokemon ? (
+              <>
+                <div className={cn("text-sm font-bold truncate", isMissed ? "text-gray-500 line-through" : "text-white")}>
+                  {enc.nickname || enc.pokemonName}
+                </div>
+                <div className="text-[10px] text-gray-600 truncate">{locName}</div>
+              </>
+            ) : (
+              <div className="text-sm font-semibold text-gray-500 truncate">{locName}</div>
+            )}
           </div>
 
-          {/* Status Badge */}
-          <div className={cn("px-2 py-1 rounded-md text-[10px] font-bold border border-white/5 flex-shrink-0", statusStyle.bg, statusStyle.text)}>
-            {enc.status}
-          </div>
-
-          {/* Edit Button */}
-          <button
-            onClick={() => toggleEditing(locName)}
-            className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition-colors flex-shrink-0 cursor-pointer relative z-20"
-          >
-            <Pencil className="h-3.5 w-3.5 text-gray-400" />
-          </button>
+          {/* Status badge */}
+          {hasPokemon && enc.status !== 'None' && (
+            <div className={cn("px-2 py-1 rounded-md text-[10px] font-bold border border-white/5 flex-shrink-0", statusStyle.bg, statusStyle.text)}>
+              {enc.status}
+            </div>
+          )}
         </div>
       );
     }
 
-    // ── Edit Mode ──
+    // ── Edit / Expanded Mode ──
     return (
       <div key={locName} className="bg-[#212121] rounded-xl border border-white/5 p-4 space-y-3 mb-3 last:mb-0 shadow-md">
         {/* Header */}
         <div className="flex items-center justify-between">
           <div className="font-bold text-gray-200 text-sm tracking-wide">{locName}</div>
-          {isCompleted && (
-            <button
-              onClick={() => toggleEditing(locName)}
-              className="text-[10px] text-gray-500 hover:text-gray-300 transition-colors font-medium cursor-pointer"
-            >
-              Cancel
-            </button>
-          )}
+          <button
+            onClick={() => toggleEditing(locName)}
+            className="text-[10px] text-gray-500 hover:text-gray-300 transition-colors font-medium cursor-pointer"
+          >
+            Done
+          </button>
         </div>
 
         {/* Pokemon sprite preview */}
