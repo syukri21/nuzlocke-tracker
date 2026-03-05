@@ -5,7 +5,7 @@ import bossesData from './data/bosses.json';
 import { Skull, Package, Gamepad2, Search, Settings, Sun, ChevronRight, CheckCircle2, CircleSlash, Copy, Gift, Sparkles, Pencil } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
-import { PokemonSelect, fetchSpriteForName, spriteCache, pokemonDataCache, fetchPokemonData } from './components/PokemonSelect';
+import { PokemonSelect, fetchSpriteForName, spriteCache, pokemonDataCache, fetchPokemonData, evolutionLineCache, fetchEvolutionLine } from './components/PokemonSelect';
 
 const STATUS_ACTIONS = [
   { key: 'Caught', icon: CheckCircle2, color: 'text-emerald-400', bg: 'bg-emerald-500/15 border-emerald-500/20', activeBg: 'bg-emerald-500/30', label: 'Catch' },
@@ -82,6 +82,25 @@ export default function App() {
       next.delete(locName);
       return next;
     });
+  };
+
+  const handleEvolve = async (locName: string) => {
+    const enc = state.encounters[locName];
+    if (!enc || !enc.pokemonName) return;
+
+    // Use cached line or fetch it
+    let line = evolutionLineCache[enc.pokemonName];
+    if (!line) {
+      line = await fetchEvolutionLine(enc.pokemonName);
+    }
+
+    if (line.length <= 1) return; // No evolution
+
+    const currentIndex = line.indexOf(enc.pokemonName.toLowerCase());
+    const nextIndex = (currentIndex + 1) % line.length;
+    const nextPokemon = line[nextIndex];
+
+    updateEncounter(locName, { pokemonName: nextPokemon });
   };
 
   const renderEncounterRow = (locName: string) => {
@@ -213,47 +232,50 @@ export default function App() {
         {/* Background Decorative Type Glow (Simplified to status color) */}
         <div className={cn("absolute -top-12 -right-12 w-24 h-24 rounded-full blur-3xl opacity-20", statusStyle.bg)} />
 
+        {/* Status Badge Overlay (Top Left) */}
+        <div className={cn("absolute top-2 left-2 z-20 px-1.5 py-0.5 rounded-md text-[7px] font-black uppercase tracking-wider border border-white/10 shadow-sm", statusStyle.bg, statusStyle.text)}>
+          {enc.status === 'Caught' ? 'Boxed' : enc.status}
+        </div>
+
         {/* Sprite */}
-        <div className="w-20 h-20 mb-2 relative z-10 flex items-center justify-center">
+        <div className="w-18 h-18 mb-1 relative z-10 flex items-center justify-center">
           {data?.sprite ? (
-            <img src={data.sprite} alt={enc.pokemonName} className="w-18 h-18 object-contain drop-shadow-xl group-hover:scale-110 transition-transform" />
+            <img src={data.sprite} alt={enc.pokemonName} className="w-16 h-16 object-contain drop-shadow-xl group-hover:scale-105 transition-transform" />
           ) : (
             <div className="w-16 h-16 rounded-full bg-black/20 animate-pulse" />
           )}
         </div>
 
-        {/* Info */}
-        <div className="text-center w-full mb-3">
-          <div className="text-xs font-black text-white truncate px-1">{enc.nickname || enc.pokemonName}</div>
-          <div className="text-[9px] text-gray-500 font-bold uppercase tracking-tighter truncate opacity-70">{enc.pokemonName}</div>
+        {/* Info + Evolve Button */}
+        <div className="text-center w-full mb-2">
+          <div className="flex items-center justify-center gap-1.5 px-1 translate-x-3">
+            <div className="text-[11px] font-black text-white truncate max-w-[80%]">{enc.nickname || enc.pokemonName}</div>
+            <button
+              onClick={() => handleEvolve(locName)}
+              className="p-1 rounded-md bg-white/5 hover:bg-white/10 text-cyan-400 group-hover:scale-110 transition-all cursor-pointer shadow-sm active:scale-90"
+              title="Evolve"
+            >
+              <Sparkles className="h-3 w-3" />
+            </button>
+          </div>
+          <div className="text-[8px] text-gray-500 font-bold uppercase tracking-tighter truncate opacity-70 mt-0.5">
+            {enc.pokemonName}
+          </div>
         </div>
 
         {/* Stats Grid */}
-        <div className="w-full grid grid-cols-3 gap-1 mb-2">
+        <div className="w-full grid grid-cols-3 gap-1 mb-1">
           {topStats.length > 0 ? (
             topStats.map(stat => (
               <div key={stat.name} className="bg-black/40 rounded-md py-1 px-0.5 flex flex-col items-center border border-white/5">
-                <span className="text-[7px] font-black text-gray-500 leading-none mb-0.5">{stat.name}</span>
-                <span className="text-[10px] font-black text-white leading-none">{stat.value}</span>
+                <span className="text-[6px] font-black text-gray-500 leading-none mb-0.5">{stat.name}</span>
+                <span className="text-[9px] font-black text-white leading-none">{stat.value}</span>
               </div>
             ))
           ) : (
             <div className="col-span-3 h-5" />
           )}
         </div>
-
-        {/* Status Badge */}
-        <div className={cn("mt-auto px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest border border-white/10", statusStyle.bg, statusStyle.text)}>
-          {enc.status}
-        </div>
-
-        {/* Quick Edit Overlay */}
-        <button
-          onClick={() => { setActiveMainTab('Game'); if (!editingLocations.has(locName)) toggleEditing(locName); }}
-          className="absolute top-2 right-2 p-1.5 rounded-full bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white/10 cursor-pointer"
-        >
-          <Pencil className="h-3 w-3 text-gray-400" />
-        </button>
       </div>
     );
   };

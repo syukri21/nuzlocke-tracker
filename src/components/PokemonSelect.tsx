@@ -14,8 +14,10 @@ export interface PokemonSelectProps {
 export interface PokemonData {
   sprite: string;
   stats: { name: string; value: number }[];
+  evolutionLine?: string[];
 }
 export const pokemonDataCache: Record<string, PokemonData> = {};
+export const evolutionLineCache: Record<string, string[]> = {};
 export const spriteCache: Record<string, string> = {}; // Keep for backward compatibility if needed
 
 // Helper to handle edge cases in API names
@@ -61,7 +63,13 @@ export const fetchPokemonData = async (name: string): Promise<PokemonData | null
       }));
 
       if (spriteUrl) {
-        const pokemonData = { sprite: spriteUrl, stats };
+        // Also try to get evolution line if not cached
+        let evolutionLine = evolutionLineCache[name];
+        if (!evolutionLine) {
+          evolutionLine = await fetchEvolutionLine(name);
+        }
+
+        const pokemonData = { sprite: spriteUrl, stats, evolutionLine };
         pokemonDataCache[name] = pokemonData;
         spriteCache[name] = spriteUrl; // Sync legacy cache
         return pokemonData;
@@ -71,6 +79,46 @@ export const fetchPokemonData = async (name: string): Promise<PokemonData | null
     console.error(`Failed to fetch data for ${name}`, e);
   }
   return null;
+};
+
+export const fetchEvolutionLine = async (name: string): Promise<string[]> => {
+  if (evolutionLineCache[name]) return evolutionLineCache[name];
+
+  try {
+    const formattedName = formatSpecialNames(name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'));
+    // 1. Get species data
+    const speciesRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${formattedName}`);
+    if (!speciesRes.ok) return [name];
+    const speciesData = await speciesRes.json();
+
+    // 2. Get evolution chain
+    const chainRes = await fetch(speciesData.evolution_chain.url);
+    if (!chainRes.ok) return [name];
+    const chainData = await chainRes.json();
+
+    // 3. Flatten the chain
+    const line: string[] = [];
+    let current = chainData.chain;
+
+    const extract = (node: any) => {
+      line.push(node.species.name);
+      if (node.evolves_to.length > 0) {
+        // For simplicity, we take the first evolution path
+        extract(node.evolves_to[0]);
+      }
+    };
+    extract(current);
+
+    // 4. Cache for all in line
+    line.forEach(p => {
+      evolutionLineCache[p] = line;
+    });
+
+    return line;
+  } catch (e) {
+    console.error(`Failed to fetch evolution for ${name}`, e);
+    return [name];
+  }
 };
 
 // Legacy shim
