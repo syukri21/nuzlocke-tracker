@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { PokemonSelect, spriteCache, pokemonDataCache, fetchPokemonData, evolutionLineCache, fetchEvolutionLine } from './components/PokemonSelect';
 import { initPokemonCache } from './lib/initPokemonCache';
 import { TypeIcon } from './components/TypeIcon';
+import { Pokeball } from './components/Pokeball';
 import { GraveyardCard } from './components/GraveyardCard';
 import { EncounterRow } from './components/EncounterRow';
 import { BoxGridItem } from './components/BoxGridItem';
@@ -309,8 +310,8 @@ export default function App() {
         {/* ── Header ──────────────────────────────────────────────────────── */}
         <header className="flex items-center justify-between px-5 py-4 border-b border-white/5 bg-[#1a1a1a]/80 backdrop-blur-md sticky top-0 z-40">
           <div className="flex items-center gap-3">
-            <div className="h-7 w-7 bg-red-500/20 text-red-500 rounded-lg flex items-center justify-center text-xs font-black uppercase italic shadow-[0_0_15px_rgba(239,68,68,0.2)]">P</div>
-            <div className="flex items-center gap-0.5">
+            <Pokeball className="h-7 w-7 opacity-70" />
+            <div className="flex items-center gap-1">
               {state.party.length === 0 ? (
                 <span className="text-xs text-gray-600 font-medium italic">No party yet</span>
               ) : (
@@ -318,7 +319,9 @@ export default function App() {
                   const enc = state.encounters[locName];
                   const sprite = enc?.pokemonName ? spriteCache[enc.pokemonName.toLowerCase()] : null;
                   return sprite ? (
-                    <img key={locName} src={sprite} alt={enc.pokemonName} className="w-8 h-8 object-contain drop-shadow" />
+                    <div key={locName} className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center overflow-hidden">
+                      <img src={sprite} alt={enc.pokemonName} className="w-7 h-7 object-contain drop-shadow" />
+                    </div>
                   ) : null;
                 })
               )}
