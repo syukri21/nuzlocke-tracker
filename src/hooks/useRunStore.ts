@@ -36,25 +36,49 @@ export function useRunStore() {
       let newBox = [...prev.box];
       let newGraveyard = [...prev.graveyard];
 
-      // Remove from everywhere first
-      newParty = newParty.filter(loc => loc !== locationName);
-      newBox = newBox.filter(loc => loc !== locationName);
-      newGraveyard = newGraveyard.filter(loc => loc !== locationName);
+      const wasInParty = prev.party.includes(locationName);
+      const wasInBox = prev.box.includes(locationName);
+      const wasInGraveyard = prev.graveyard.includes(locationName);
 
-      if (updated.status === 'Caught' || updated.status === 'Gift' || updated.status === 'Shiny') {
-        if (updated.isPartyMember) {
+      const isCaughtCategory = updated.status === 'Caught' || updated.status === 'Gift' || updated.status === 'Shiny';
+      const shouldBeInParty = isCaughtCategory && updated.isPartyMember;
+      const shouldBeInBox = isCaughtCategory && !updated.isPartyMember;
+      const shouldBeInGraveyard = updated.status === 'Fainted';
+
+      // 1. Handle Party
+      if (shouldBeInParty) {
+        if (!wasInParty) {
           newParty.push(locationName);
-        } else {
-          newBox.push(locationName);
+          newBox = newBox.filter(loc => loc !== locationName);
+          newGraveyard = newGraveyard.filter(loc => loc !== locationName);
         }
-      } else if (updated.status === 'Fainted') {
-        newGraveyard.push(locationName);
+      } else {
+        newParty = newParty.filter(loc => loc !== locationName);
+      }
+
+      // 2. Handle Box
+      if (shouldBeInBox) {
+        if (!wasInBox) {
+          newBox.push(locationName);
+          newGraveyard = newGraveyard.filter(loc => loc !== locationName);
+        }
+      } else {
+        newBox = newBox.filter(loc => loc !== locationName);
+      }
+
+      // 3. Handle Graveyard
+      if (shouldBeInGraveyard) {
+        if (!wasInGraveyard) {
+          newGraveyard.push(locationName);
+        }
+      } else {
+        newGraveyard = newGraveyard.filter(loc => loc !== locationName);
       }
 
       return {
         ...prev,
         encounters: newEncounters,
-        party: newParty.slice(0, 6), // Max 6 in party
+        party: newParty.slice(0, 6),
         box: newBox,
         graveyard: newGraveyard
       };

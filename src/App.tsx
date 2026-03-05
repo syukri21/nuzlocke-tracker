@@ -100,8 +100,14 @@ export default function App() {
     const nextIndex = (currentIndex + 1) % line.length;
     const nextPokemon = line[nextIndex];
 
+    // Pre-fetch data for the next pokemon to ensure instant image/stat swap
+    await fetchPokemonData(nextPokemon);
+
     updateEncounter(locName, { pokemonName: nextPokemon });
   };
+
+  // Helper to capitalize first letter
+  const cap = (s?: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
 
   const renderEncounterRow = (locName: string) => {
     const enc = state.encounters[locName] || { locationName: locName, status: 'None' };
@@ -249,7 +255,7 @@ export default function App() {
         {/* Info + Evolve Button */}
         <div className="text-center w-full mb-2">
           <div className="flex items-center justify-center gap-1.5 px-1 translate-x-3">
-            <div className="text-[11px] font-black text-white truncate max-w-[80%]">{enc.nickname || enc.pokemonName}</div>
+            <div className="text-[11px] font-black text-white truncate max-w-[80%]">{enc.nickname || cap(enc.pokemonName)}</div>
             <button
               onClick={() => handleEvolve(locName)}
               className="p-1 rounded-md bg-white/5 hover:bg-white/10 text-cyan-400 group-hover:scale-110 transition-all cursor-pointer shadow-sm active:scale-90"
@@ -259,7 +265,7 @@ export default function App() {
             </button>
           </div>
           <div className="text-[8px] text-gray-500 font-bold uppercase tracking-tighter truncate opacity-70 mt-0.5">
-            {enc.pokemonName}
+            {cap(enc.pokemonName)}
           </div>
         </div>
 
