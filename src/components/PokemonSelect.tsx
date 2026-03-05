@@ -14,6 +14,7 @@ export interface PokemonSelectProps {
 export interface PokemonData {
   sprite: string;
   stats: { name: string; value: number }[];
+  types?: string[];
   evolutionLine?: string[];
 }
 export const pokemonDataCache: Record<string, PokemonData> = {};
@@ -61,6 +62,7 @@ export const fetchPokemonData = async (name: string): Promise<PokemonData | null
         name: s.stat.name.replace('special-', 'sp.').toUpperCase(),
         value: s.base_stat
       }));
+      const types = data.types.map((t: any) => t.type.name as string);
 
       if (spriteUrl) {
         // Also try to get evolution line if not cached
@@ -69,7 +71,7 @@ export const fetchPokemonData = async (name: string): Promise<PokemonData | null
           evolutionLine = await fetchEvolutionLine(name);
         }
 
-        const pokemonData = { sprite: spriteUrl, stats, evolutionLine };
+        const pokemonData = { sprite: spriteUrl, stats, types, evolutionLine };
         pokemonDataCache[name] = pokemonData;
         spriteCache[name] = spriteUrl; // Sync legacy cache
         return pokemonData;
@@ -96,18 +98,22 @@ export const fetchEvolutionLine = async (name: string): Promise<string[]> => {
     if (!chainRes.ok) return [name];
     const chainData = await chainRes.json();
 
-    // 3. Flatten the chain
+    // 3. Flatten the chain (handles branching like Eevee)
     const line: string[] = [];
-    let current = chainData.chain;
+    const seen = new Set<string>();
 
     const extract = (node: any) => {
-      line.push(node.species.name);
+      const sName = node.species.name;
+      if (!seen.has(sName)) {
+        line.push(sName);
+        seen.add(sName);
+      }
+      // Recursively traverse all possible evolution paths
       if (node.evolves_to.length > 0) {
-        // For simplicity, we take the first evolution path
-        extract(node.evolves_to[0]);
+        node.evolves_to.forEach((branch: any) => extract(branch));
       }
     };
-    extract(current);
+    extract(chainData.chain);
 
     // 4. Cache for all in line
     line.forEach(p => {

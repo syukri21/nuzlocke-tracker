@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRunStore } from './hooks/useRunStore';
 import locationsData from './data/locations.json';
 import bossesData from './data/bosses.json';
-import { Skull, Package, Gamepad2, Search, Settings, Sun, ChevronRight, CheckCircle2, CircleSlash, Copy, Gift, Sparkles, Pencil } from 'lucide-react';
+import { Skull, Package, Gamepad2, Search, Settings, Sun, ChevronRight, CheckCircle2, CircleSlash, Copy, Gift, Sparkles, Pencil, X, Ruler, Weight } from 'lucide-react';
 import { cn } from "@/lib/utils";
 
 import { PokemonSelect, fetchSpriteForName, spriteCache, pokemonDataCache, fetchPokemonData, evolutionLineCache, fetchEvolutionLine } from './components/PokemonSelect';
@@ -26,12 +26,56 @@ const STATUS_COLOR_MAP: Record<string, { text: string; bg: string }> = {
   None: { text: 'text-gray-400', bg: 'bg-gray-500/20' },
 };
 
+const TYPE_COLORS: Record<string, string> = {
+  normal: 'bg-gray-500',
+  fire: 'bg-orange-500',
+  water: 'bg-blue-500',
+  electric: 'bg-yellow-400',
+  grass: 'bg-green-500',
+  ice: 'bg-cyan-400',
+  fighting: 'bg-red-700',
+  poison: 'bg-purple-500',
+  ground: 'bg-yellow-600',
+  flying: 'bg-indigo-400',
+  psychic: 'bg-pink-500',
+  bug: 'bg-lime-500',
+  rock: 'bg-yellow-700',
+  ghost: 'bg-purple-700',
+  dragon: 'bg-indigo-600',
+  dark: 'bg-gray-700',
+  steel: 'bg-slate-400',
+  fairy: 'bg-pink-400',
+};
+
+const STAT_COLORS: Record<string, string> = {
+  HP: 'bg-red-500',
+  ATTACK: 'bg-orange-500',
+  DEFENSE: 'bg-yellow-500',
+  'SP.ATTACK': 'bg-blue-500',
+  'SP.DEFENSE': 'bg-green-500',
+  SPEED: 'bg-pink-500',
+};
+
+interface DetailData {
+  sprite: string;
+  name: string;
+  nickname?: string;
+  types: string[];
+  stats: { name: string; value: number }[];
+  abilities: string[];
+  height: number;
+  weight: number;
+  evolutionLine?: string[];
+}
+
 export default function App() {
   const { state, updateEncounter } = useRunStore();
   const [activeMainTab, setActiveMainTab] = useState<'Game' | 'Box' | 'Grave'>('Game');
   const [activeSubTab, setActiveSubTab] = useState<'Nuzlocke' | 'Routes' | 'Bosses' | 'Upcoming'>('Nuzlocke');
   const [searchTerm, setSearchTerm] = useState('');
   const [editingLocations, setEditingLocations] = useState<Set<string>>(new Set());
+  const [detailPokemon, setDetailPokemon] = useState<DetailData | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   // State to hold boss sprites once fetched
   const [bossSprites, setBossSprites] = useState<Record<string, string>>({});
@@ -105,6 +149,64 @@ export default function App() {
 
     updateEncounter(locName, { pokemonName: nextPokemon });
   };
+
+  const openPokemonDetail = useCallback(async (locName: string) => {
+    const enc = state.encounters[locName];
+    if (!enc?.pokemonName) return;
+
+    setDetailLoading(true);
+    setDetailPokemon(null);
+
+    try {
+      const { formatSpecialNames } = await import('./components/PokemonSelect');
+      const name = enc.pokemonName;
+      const formattedName = formatSpecialNames(name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'));
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${formattedName}`);
+      if (!res.ok) throw new Error('Not found');
+      const data = await res.json();
+
+      const STAT_NAME_MAP: Record<string, string> = {
+        hp: 'HP',
+        attack: 'ATTACK',
+        defense: 'DEFENSE',
+        'special-attack': 'SP.ATTACK',
+        'special-defense': 'SP.DEFENSE',
+        speed: 'SPEED',
+      };
+      const stats = data.stats.map((s: any) => ({
+        name: STAT_NAME_MAP[s.stat.name] || s.stat.name.toUpperCase(),
+        value: s.base_stat,
+      }));
+
+      setDetailPokemon({
+        sprite: data.sprites?.other?.['official-artwork']?.front_default || data.sprites?.front_default || '',
+        name,
+        nickname: enc.nickname,
+        types: data.types.map((t: any) => t.type.name),
+        stats,
+        abilities: data.abilities.map((a: any) => a.ability.name.replace(/-/g, ' ')),
+        height: data.height,
+        weight: data.weight,
+      });
+    } catch (e) {
+      // fallback to cached data
+      const cached = pokemonDataCache[state.encounters[locName]?.pokemonName || ''];
+      if (cached) {
+        setDetailPokemon({
+          sprite: cached.sprite,
+          name: state.encounters[locName].pokemonName!,
+          nickname: state.encounters[locName].nickname,
+          types: [],
+          stats: cached.stats,
+          abilities: [],
+          height: 0,
+          weight: 0,
+        });
+      }
+    } finally {
+      setDetailLoading(false);
+    }
+  }, [state.encounters]);
 
   // Helper to capitalize first letter
   const cap = (s?: string) => s ? s.charAt(0).toUpperCase() + s.slice(1) : '';
@@ -234,7 +336,11 @@ export default function App() {
     const statusStyle = STATUS_COLOR_MAP[enc.status] || STATUS_COLOR_MAP.None;
 
     return (
-      <div key={locName} className="bg-[#212121] rounded-2xl border border-white/5 p-3 flex flex-col items-center shadow-lg relative overflow-hidden group">
+      <div
+        key={locName}
+        className="bg-[#212121] rounded-2xl border border-white/5 p-3 flex flex-col items-center shadow-lg relative overflow-hidden group cursor-pointer active:scale-95 transition-transform"
+        onClick={() => openPokemonDetail(locName)}
+      >
         {/* Background Decorative Type Glow (Simplified to status color) */}
         <div className={cn("absolute -top-12 -right-12 w-24 h-24 rounded-full blur-3xl opacity-20", statusStyle.bg)} />
 
@@ -242,6 +348,17 @@ export default function App() {
         <div className={cn("absolute top-2 left-2 z-20 px-1.5 py-0.5 rounded-md text-[7px] font-black uppercase tracking-wider border border-white/10 shadow-sm", statusStyle.bg, statusStyle.text)}>
           {enc.status === 'Caught' ? 'Boxed' : enc.status}
         </div>
+
+        {/* Type Badges Overlay (Top Right) */}
+        {data?.types && data.types.length > 0 && (
+          <div className="absolute top-2 right-2 z-20 flex flex-col gap-0.5 items-end">
+            {data.types.map(type => (
+              <span key={type} className={cn("px-1.5 py-0.5 rounded text-[7px] font-black uppercase text-white tracking-wide shadow-sm", TYPE_COLORS[type] || 'bg-gray-600')}>
+                {type}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Sprite */}
         <div className="w-18 h-18 mb-1 relative z-10 flex items-center justify-center">
@@ -253,11 +370,11 @@ export default function App() {
         </div>
 
         {/* Info + Evolve Button */}
-        <div className="text-center w-full mb-2">
+        <div className="text-center w-full mb-1.5">
           <div className="flex items-center justify-center gap-1.5 px-1 translate-x-3">
             <div className="text-[11px] font-black text-white truncate max-w-[80%]">{enc.nickname || cap(enc.pokemonName)}</div>
             <button
-              onClick={() => handleEvolve(locName)}
+              onClick={(e) => { e.stopPropagation(); handleEvolve(locName); }}
               className="p-1 rounded-md bg-white/5 hover:bg-white/10 text-cyan-400 group-hover:scale-110 transition-all cursor-pointer shadow-sm active:scale-90"
               title="Evolve"
             >
@@ -267,6 +384,12 @@ export default function App() {
           <div className="text-[8px] text-gray-500 font-bold uppercase tracking-tighter truncate opacity-70 mt-0.5">
             {cap(enc.pokemonName)}
           </div>
+        </div>
+
+
+        {/* Location */}
+        <div className="w-full text-center mb-1.5">
+          <span className="text-[7px] text-gray-600 font-medium truncate block">{locName}</span>
         </div>
 
         {/* Stats Grid */}
@@ -420,6 +543,121 @@ export default function App() {
             </div>
           )}
         </main>
+
+        {/* Pokemon Detail Modal */}
+        {(detailPokemon || detailLoading) && (
+          <div
+            className="fixed inset-0 z-[200] flex items-end justify-center"
+            style={{ maxWidth: '400px', left: '50%', transform: 'translateX(-50%)' }}
+          >
+            {/* Backdrop */}
+            <div
+              className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+              onClick={() => setDetailPokemon(null)}
+            />
+
+            {/* Sheet */}
+            <div className="relative w-full bg-[#1a1a1a] rounded-t-3xl border-t border-white/10 shadow-2xl pb-10 max-h-[85vh] overflow-y-auto styled-scrollbar">
+              {/* Handle */}
+              <div className="flex justify-center pt-3 pb-2">
+                <div className="w-10 h-1 bg-white/20 rounded-full" />
+              </div>
+
+              {/* Close */}
+              <button
+                onClick={() => setDetailPokemon(null)}
+                className="absolute top-4 right-4 p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+              >
+                <X className="h-4 w-4 text-gray-400" />
+              </button>
+
+              {detailLoading ? (
+                <div className="flex flex-col items-center justify-center py-16 gap-3">
+                  <div className="w-16 h-16 rounded-full bg-white/5 animate-pulse" />
+                  <div className="h-3 w-24 bg-white/5 rounded animate-pulse" />
+                  <div className="h-2 w-16 bg-white/5 rounded animate-pulse" />
+                </div>
+              ) : detailPokemon && (
+                <div className="px-5 pb-4">
+                  {/* Sprite */}
+                  <div className="flex justify-center mb-3">
+                    {detailPokemon.sprite ? (
+                      <img src={detailPokemon.sprite} alt={detailPokemon.name} className="w-32 h-32 object-contain drop-shadow-2xl" />
+                    ) : (
+                      <div className="w-32 h-32 rounded-full bg-white/5 animate-pulse" />
+                    )}
+                  </div>
+
+                  {/* Name */}
+                  <div className="text-center mb-3">
+                    {detailPokemon.nickname && (
+                      <div className="text-xl font-black text-white">{detailPokemon.nickname}</div>
+                    )}
+                    <div className={cn("font-bold text-gray-400", detailPokemon.nickname ? "text-sm" : "text-xl text-white")}>{cap(detailPokemon.name)}</div>
+                  </div>
+
+                  {/* Types */}
+                  {detailPokemon.types.length > 0 && (
+                    <div className="flex justify-center gap-2 mb-5">
+                      {detailPokemon.types.map(type => (
+                        <span key={type} className={cn("px-3 py-1 rounded-full text-[10px] font-black uppercase text-white tracking-wider", TYPE_COLORS[type] || 'bg-gray-600')}>
+                          {type}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Height / Weight */}
+                  {(detailPokemon.height > 0 || detailPokemon.weight > 0) && (
+                    <div className="flex justify-center gap-6 mb-5">
+                      <div className="flex items-center gap-1.5 text-gray-400">
+                        <Ruler className="h-3.5 w-3.5" />
+                        <span className="text-xs font-bold text-white">{(detailPokemon.height / 10).toFixed(1)}m</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-gray-400">
+                        <Weight className="h-3.5 w-3.5" />
+                        <span className="text-xs font-bold text-white">{(detailPokemon.weight / 10).toFixed(1)}kg</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Base Stats */}
+                  <div className="mb-5">
+                    <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-3">Base Stats</div>
+                    <div className="space-y-2">
+                      {detailPokemon.stats.map(stat => (
+                        <div key={stat.name} className="flex items-center gap-3">
+                          <span className="text-[9px] font-black text-gray-500 w-16 text-right flex-shrink-0">{stat.name}</span>
+                          <div className="flex-1 h-2 bg-white/5 rounded-full overflow-hidden">
+                            <div
+                              className={cn("h-full rounded-full transition-all", STAT_COLORS[stat.name] || 'bg-gray-500')}
+                              style={{ width: `${Math.min((stat.value / 255) * 100, 100)}%` }}
+                            />
+                          </div>
+                          <span className="text-[10px] font-black text-white w-6 flex-shrink-0">{stat.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Abilities */}
+                  {detailPokemon.abilities.length > 0 && (
+                    <div>
+                      <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Abilities</div>
+                      <div className="flex flex-wrap gap-2">
+                        {detailPokemon.abilities.map(ability => (
+                          <span key={ability} className="px-2.5 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-semibold text-gray-300 capitalize">
+                            {ability}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Fixed Mobile Bottom Navigation */}
         <div className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[400px] bg-[#1a1a1a]/95 backdrop-blur-xl border-t border-white/5 flex justify-around p-2 z-[100] rounded-t-2xl pb-safe shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
