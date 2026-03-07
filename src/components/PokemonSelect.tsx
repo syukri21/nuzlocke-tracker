@@ -66,6 +66,7 @@ export interface MoveDetail {
   power: number | null;
   accuracy: number | null;
   pp: number | null;
+  description?: string;
 }
 
 const MOVE_DETAIL_LS_KEY = 'lazarus_move_detail_cache';
@@ -81,19 +82,22 @@ export const moveDetailCache: Record<string, MoveDetail> = (() => {
 
 export const fetchMoveDetail = async (moveName: string): Promise<MoveDetail | null> => {
   const key = moveName.toLowerCase().replace(/\s+/g, '-');
-  if (moveDetailCache[key]) return moveDetailCache[key];
+  // Skip cache if description is missing (older cached entries lack it)
+  if (moveDetailCache[key]?.description !== undefined) return moveDetailCache[key];
   // Strip apostrophes/backticks for PokeAPI URL (e.g. "king's-shield" → "kings-shield")
   const apiKey = key.replace(/[`']/g, '');
   try {
     const res = await fetch(`https://pokeapi.co/api/v2/move/${apiKey}`);
     if (res.ok) {
       const data = await res.json();
+      const en = data.effect_entries?.find((e: any) => e.language.name === 'en');
       const detail: MoveDetail = {
         type: data.type.name,
         damageClass: data.damage_class.name,
         power: data.power,
         accuracy: data.accuracy,
         pp: data.pp,
+        description: en?.short_effect ?? '',
       };
       moveDetailCache[key] = detail;
       try { localStorage.setItem(MOVE_DETAIL_LS_KEY, JSON.stringify(moveDetailCache)); } catch { /* ignore */ }

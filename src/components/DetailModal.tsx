@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { X, Ruler, Weight, Swords, ChevronLeft, Search } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { X, Ruler, Weight, Swords, ChevronLeft, Search, Info } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { DetailData, BossEntry } from '../types';
 import { STAT_COLORS, TYPE_BG, getTypeMatchups, ALL_TYPES, cap } from '../constants/gameConstants';
@@ -31,7 +32,7 @@ function useMoveDetail(move: string) {
 
 // ── Compare move row ──────────────────────────────────────────────────────────
 
-function CompareMoveRow({ move, defTypes }: { move: string; defTypes: string[] }) {
+function CompareMoveRow({ move, defTypes, onClick }: { move: string; defTypes: string[]; onClick?: () => void }) {
   const detail = useMoveDetail(move);
   const mType = detail?.type ?? (moveTypes[move.toLowerCase()] ?? 'normal');
   const eff = getMoveEffect(mType, defTypes);
@@ -39,7 +40,8 @@ function CompareMoveRow({ move, defTypes }: { move: string; defTypes: string[] }
 
   return (
     <div
-      className="flex items-center rounded overflow-hidden border bg-black/30"
+      onClick={onClick}
+      className={cn('flex items-center rounded overflow-hidden border bg-black/30', onClick && 'cursor-pointer active:scale-[0.98] transition-transform')}
       style={{ borderColor: `${bg}50`, boxShadow: eff.mult >= 2 ? `0 0 8px ${bg}40` : 'none' }}
     >
       <span className="inline-flex items-center justify-center w-6 h-full flex-shrink-0 py-1.5" style={{ backgroundColor: bg }}>
@@ -151,6 +153,133 @@ function MoveDetailBadge({ move }: { move: string }) {
   );
 }
 
+// ── Move full-detail sheet ────────────────────────────────────────────────────
+
+export function MoveSheet({ move, onClose }: { move: string; onClose: () => void }) {
+  const detail = useMoveDetail(move);
+  const type = detail?.type ?? (moveTypes[move.toLowerCase().replace(/\s+/g, '-')] ?? 'normal');
+  const color = TYPE_BG[type] || '#9099A1';
+
+  const coverageGroups = [
+    { label: '4×', title: 'Super Effective', types: ALL_TYPES.filter(t => { const m = getTypeMatchups([t]); return m.superWeak.some(() => true) && getMoveEff(type, [t]) >= 4; }), cls: 'text-red-300' },
+    { label: '2×', title: 'Effective',       types: ALL_TYPES.filter(t => getMoveEff(type, [t]) === 2),    cls: 'text-orange-300' },
+    { label: '½×', title: 'Resist',          types: ALL_TYPES.filter(t => getMoveEff(type, [t]) === 0.5),  cls: 'text-blue-400'   },
+    { label: '¼×', title: 'Super Resist',    types: ALL_TYPES.filter(t => getMoveEff(type, [t]) === 0.25), cls: 'text-cyan-400'   },
+    { label: '0×', title: 'Immune',          types: ALL_TYPES.filter(t => getMoveEff(type, [t]) === 0),    cls: 'text-gray-500'   },
+  ].filter(g => g.types.length > 0);
+
+  return createPortal(
+    <div className="fixed inset-0 z-[400] flex items-end justify-center">
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="relative w-full bg-[#1a1a1a] rounded-t-3xl border-t shadow-2xl max-h-[80vh] overflow-y-auto styled-scrollbar pb-10"
+        style={{ borderColor: `${color}40` }}
+      >
+        <div className="w-full max-w-[400px] mx-auto">
+          <div className="flex justify-center pt-3 pb-1">
+            <div className="w-10 h-1 bg-white/20 rounded-full" />
+          </div>
+
+          {/* Header */}
+          <div className="flex items-center gap-3 px-5 py-3 border-b border-white/5">
+            <span className="inline-flex items-center justify-center w-9 h-9 rounded-xl flex-shrink-0" style={{ backgroundColor: color }}>
+              <img src={`${import.meta.env.BASE_URL}type-icons/${type}.svg`} alt={type} className="w-5 h-5 object-contain" />
+            </span>
+            <div className="flex-1 min-w-0">
+              <div className="text-base font-black text-white">{cap(move)}</div>
+              <div className="text-[9px] capitalize font-bold" style={{ color }}>{type}</div>
+            </div>
+            {detail && (
+              <span className="text-[9px] font-bold px-2 py-1 rounded-lg flex-shrink-0"
+                style={{ backgroundColor: `${DC_COLOR[detail.damageClass]}20`, color: DC_COLOR[detail.damageClass] }}>
+                {DC_LABEL[detail.damageClass]}
+              </span>
+            )}
+            <button onClick={onClose} className="p-1.5 rounded-full bg-white/8 hover:bg-white/15 transition-colors flex-shrink-0">
+              <X className="h-4 w-4 text-gray-400" />
+            </button>
+          </div>
+
+          <div className="px-5 py-4 space-y-5">
+            {/* Stats row */}
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { label: 'Power',    value: detail?.power    != null ? String(detail.power) : '—' },
+                { label: 'Accuracy', value: detail?.accuracy != null ? `${detail.accuracy}%` : '—' },
+                { label: 'PP',       value: detail?.pp       != null ? String(detail.pp) : '—' },
+              ].map(({ label, value }) => (
+                <div key={label} className="bg-black/30 rounded-xl p-3 text-center border border-white/5">
+                  <div className="text-[8px] text-gray-500 font-bold uppercase tracking-wider mb-1">{label}</div>
+                  <div className="text-sm font-black text-white">{value}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Loading */}
+            {detail === null && (
+              <div className="space-y-2">
+                <div className="h-2.5 w-full bg-white/5 rounded animate-pulse" />
+                <div className="h-2.5 w-4/5 bg-white/5 rounded animate-pulse" />
+                <div className="h-2.5 w-3/5 bg-white/5 rounded animate-pulse" />
+              </div>
+            )}
+
+            {/* Description */}
+            {detail?.description && (
+              <div>
+                <div className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-1.5">Effect</div>
+                <div className="text-[11px] text-gray-300 leading-relaxed bg-black/20 rounded-xl px-3 py-2.5">
+                  {detail.description}
+                </div>
+              </div>
+            )}
+
+            {/* Coverage */}
+            {coverageGroups.length > 0 && (
+              <div>
+                <div className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-2">Type Coverage</div>
+                <div className="space-y-2">
+                  {coverageGroups.map(({ label, title, types, cls }) => (
+                    <div key={label} className="flex items-start gap-2">
+                      <div className="flex items-center gap-0.5 w-14 flex-shrink-0 pt-0.5">
+                        <span className={`text-[9px] font-black ${cls}`}>{label}</span>
+                        <span className="text-[7px] text-gray-600">{title}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1">
+                        {types.map(t => (
+                          <div key={t} className="flex items-center gap-0.5 rounded overflow-hidden border bg-black/30"
+                            style={{ borderColor: `${TYPE_BG[t] || '#9099A1'}50` }}>
+                            <span className="inline-flex items-center justify-center w-5 h-5 flex-shrink-0" style={{ backgroundColor: TYPE_BG[t] || '#9099A1' }}>
+                              <img src={`${import.meta.env.BASE_URL}type-icons/${t}.svg`} alt={t} className="w-3 h-3 object-contain" />
+                            </span>
+                            <span className="text-[9px] text-gray-300 px-1.5 capitalize leading-none py-0.5">{t}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
+// Helper for coverage calculation (simpler than getMoveEffect below)
+function getMoveEff(moveType: string, defTypes: string[]): number {
+  const { superWeak, weak, resist, superResist, immune } = getTypeMatchups(defTypes);
+  if (immune.some(t => t.type === moveType))      return 0;
+  if (superResist.some(t => t.type === moveType)) return 0.25;
+  if (resist.some(t => t.type === moveType))      return 0.5;
+  if (superWeak.some(t => t.type === moveType))   return 4;
+  if (weak.some(t => t.type === moveType))        return 2;
+  return 1;
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function getMoveEffect(moveType: string, defenderTypes: string[]) {
@@ -188,6 +317,7 @@ export function DetailModal({ detail, loading, onClose, bosses, partyDetails }: 
   const [bossSearch, setBossSearch] = useState('');
   const [bossPokeIndex, setBossPokeIndex] = useState(0);
   const [partyPokeIndex, setPartyPokeIndex] = useState(0);
+  const [selectedMove, setSelectedMove] = useState<string | null>(null);
 
   // Reset compare state when the detail changes; sync party index to the opened Pokemon
   useEffect(() => {
@@ -210,10 +340,16 @@ export function DetailModal({ detail, loading, onClose, bosses, partyDetails }: 
 
   const defTypes = detail?.types ?? [];
 
+  // Render MoveSheet on top of everything when a move is selected
+  const moveSheetEl = selectedMove
+    ? <MoveSheet move={selectedMove} onClose={() => setSelectedMove(null)} />
+    : null;
+
   // ── Boss picker view ─────────────────────────────────────────────────────
 
   if (view === 'bossPicker') {
     const q = bossSearch.toLowerCase();
+    // (no move sheet in boss picker)
     const filtered = (bosses ?? []).filter(b =>
       !q ||
       b.name.toLowerCase().includes(q) ||
@@ -338,6 +474,7 @@ export function DetailModal({ detail, loading, onClose, bosses, partyDetails }: 
     });
 
     return (
+      <>
       <div className="fixed inset-0 z-[200] flex items-end justify-center">
         <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
         <div className="relative w-full bg-[#1a1a1a] rounded-t-3xl border-t border-white/10 shadow-2xl max-h-[85vh] overflow-y-auto styled-scrollbar pb-10">
@@ -476,7 +613,7 @@ export function DetailModal({ detail, loading, onClose, bosses, partyDetails }: 
                   <div className="text-[9px] text-gray-700 italic">No moves set — assign moves on the Team page</div>
                 ) : (
                   <div className="space-y-1">
-                    {sortedYourMoves.map(move => <CompareMoveRow key={move} move={move} defTypes={bossTypes} />)}
+                    {sortedYourMoves.map(move => <CompareMoveRow key={move} move={move} defTypes={bossTypes} onClick={() => setSelectedMove(move)} />)}
                   </div>
                 )}
               </div>
@@ -487,19 +624,22 @@ export function DetailModal({ detail, loading, onClose, bosses, partyDetails }: 
                   {cap(p.name)}'s moves vs {cap(activePoke.nickname || activePoke.name)}
                 </div>
                 <div className="space-y-1">
-                  {sortedBossMoves.map(move => <CompareMoveRow key={move} move={move} defTypes={userDefTypes} />)}
+                  {sortedBossMoves.map(move => <CompareMoveRow key={move} move={move} defTypes={userDefTypes} onClick={() => setSelectedMove(move)} />)}
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+      {moveSheetEl}
+    </>
     );
   }
 
   // ── Normal detail view ───────────────────────────────────────────────────
 
   return (
+    <>
     <div className="fixed inset-0 z-[200] flex items-end justify-center">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
@@ -630,7 +770,9 @@ export function DetailModal({ detail, loading, onClose, bosses, partyDetails }: 
                   <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Moves</div>
                   <div className="grid grid-cols-2 gap-1.5">
                     {detail.moves.map(move => (
-                      <MoveDetailBadge key={move} move={move} />
+                      <button key={move} type="button" onClick={() => setSelectedMove(move)} className="text-left active:scale-[0.97] transition-transform">
+                        <MoveDetailBadge move={move} />
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -674,5 +816,7 @@ export function DetailModal({ detail, loading, onClose, bosses, partyDetails }: 
         </div>
       </div>
     </div>
+    {moveSheetEl}
+    </>
   );
 }

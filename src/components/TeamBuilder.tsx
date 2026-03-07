@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
-import { X, Sparkles, Skull } from 'lucide-react';
+import { X, Sparkles, Skull, Info } from 'lucide-react';
 import { Encounter } from '../types';
 import { cap, getTypeMatchups, ALL_TYPES, TYPE_BG } from '../constants/gameConstants';
 import { TypeIcon } from './TypeIcon';
 import { Pokeball } from './Pokeball';
 import { pokemonDataCache, spriteCache, fetchPokemonMoves, fetchMoveDetail, moveDetailCache, prefetchMoveDetails, MoveDetail } from './PokemonSelect';
+import { MoveSheet } from './DetailModal';
 import moveTypesJson from '../data/move-types.json';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -214,55 +215,63 @@ function useMoveDetail(moveName: string) {
   return detail;
 }
 
-function MoveRow({ move, isSelected, isFull, onToggle }: {
+function MoveRow({ move, isSelected, isFull, onToggle, onInfo }: {
   move: string;
   isSelected: boolean;
   isFull: boolean;
   onToggle: () => void;
+  onInfo: () => void;
 }) {
   const detail = useMoveDetail(move);
   const type = detail?.type ?? (moveTypes[move.toLowerCase()] ?? 'normal');
 
   return (
-    <button
-      onClick={onToggle}
-      disabled={isFull}
-      className={cn(
-        'w-full flex items-center gap-2 rounded-xl px-3 py-2 transition-all text-left border',
-        isSelected
-          ? 'bg-white/10 border-white/20'
-          : isFull
-            ? 'opacity-30 border-transparent cursor-not-allowed bg-transparent'
-            : 'bg-[#212121] border-white/5 hover:bg-[#2a2a2a] active:scale-[0.98]'
-      )}
-    >
-      {/* Type icon */}
-      <span className="inline-flex items-center justify-center w-5 h-5 rounded-md flex-shrink-0" style={{ backgroundColor: TYPE_BG[type] || '#9099A1' }}>
-        <img src={`${import.meta.env.BASE_URL}type-icons/${type}.svg`} alt={type} className="w-3.5 h-3.5 object-contain" />
-      </span>
+    <div className={cn(
+      'flex items-center gap-2 rounded-xl border overflow-hidden transition-all',
+      isSelected
+        ? 'bg-white/10 border-white/20'
+        : isFull
+          ? 'opacity-30 border-transparent bg-transparent'
+          : 'bg-[#212121] border-white/5'
+    )}>
+      <button
+        onClick={onToggle}
+        disabled={isFull}
+        className="flex-1 flex items-center gap-2 px-3 py-2 text-left min-w-0 disabled:cursor-not-allowed active:scale-[0.98] transition-transform"
+      >
+        {/* Type icon */}
+        <span className="inline-flex items-center justify-center w-5 h-5 rounded-md flex-shrink-0" style={{ backgroundColor: TYPE_BG[type] || '#9099A1' }}>
+          <img src={`${import.meta.env.BASE_URL}type-icons/${type}.svg`} alt={type} className="w-3.5 h-3.5 object-contain" />
+        </span>
 
-      {/* Name */}
-      <span className="text-[11px] font-bold text-white flex-1 truncate">{cap(move)}</span>
+        {/* Name */}
+        <span className="text-[11px] font-bold text-white flex-1 truncate">{cap(move)}</span>
 
-      {/* Details */}
-      {detail ? (
-        <div className="flex items-center gap-1.5 flex-shrink-0">
-          <span className="text-[8px] font-bold px-1 py-0.5 rounded" style={{ backgroundColor: `${DC_COLOR[detail.damageClass]}30`, color: DC_COLOR[detail.damageClass] }}>
-            {DC_LABEL[detail.damageClass]}
-          </span>
-          {detail.power !== null && (
-            <span className="text-[9px] font-black text-white/70 w-7 text-right">{detail.power}</span>
-          )}
-          {detail.accuracy !== null && (
-            <span className="text-[9px] text-gray-500 w-7 text-right">{detail.accuracy}%</span>
-          )}
-        </div>
-      ) : (
-        <div className="w-4 h-4 rounded-full bg-white/5 animate-pulse flex-shrink-0" />
-      )}
+        {/* Details */}
+        {detail ? (
+          <div className="flex items-center gap-1.5 flex-shrink-0">
+            <span className="text-[8px] font-bold px-1 py-0.5 rounded" style={{ backgroundColor: `${DC_COLOR[detail.damageClass]}30`, color: DC_COLOR[detail.damageClass] }}>
+              {DC_LABEL[detail.damageClass]}
+            </span>
+            {detail.power !== null && (
+              <span className="text-[9px] font-black text-white/70 w-7 text-right">{detail.power}</span>
+            )}
+          </div>
+        ) : (
+          <div className="w-4 h-4 rounded-full bg-white/5 animate-pulse flex-shrink-0" />
+        )}
 
-      {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 flex-shrink-0" />}
-    </button>
+        {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 flex-shrink-0" />}
+      </button>
+
+      {/* Info button */}
+      <button
+        onClick={e => { e.stopPropagation(); onInfo(); }}
+        className="px-2 py-2 text-gray-600 hover:text-gray-300 transition-colors flex-shrink-0"
+      >
+        <Info className="w-3.5 h-3.5" />
+      </button>
+    </div>
   );
 }
 
@@ -275,14 +284,19 @@ function MovePicker({ pokemonName, currentMoves, onSave, onClose }: {
   const [available, setAvailable] = useState<string[] | null>(null);
   const [selected, setSelected] = useState<string[]>(currentMoves);
   const [search, setSearch] = useState('');
+  const [sheetMove, setSheetMove] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPokemonMoves(pokemonName).then(setAvailable);
   }, [pokemonName]);
 
-  const filtered = (available ?? []).filter(m =>
-    m.toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = (available ?? []).filter(m => {
+    const q = search.toLowerCase();
+    if (!q) return true;
+    if (m.toLowerCase().includes(q)) return true;
+    const type = moveDetailCache[m.toLowerCase().replace(/\s+/g, '-')]?.type ?? moveTypes[m.toLowerCase().replace(/\s+/g, '-')];
+    return !!type && type.toLowerCase().includes(q);
+  });
 
   const toggle = (move: string) => {
     setSelected(prev =>
@@ -371,6 +385,7 @@ function MovePicker({ pokemonName, currentMoves, onSave, onClose }: {
               isSelected={selected.includes(move)}
               isFull={selected.length >= 4 && !selected.includes(move)}
               onToggle={() => toggle(move)}
+              onInfo={() => setSheetMove(move)}
             />
           ))}
         </div>
@@ -385,6 +400,7 @@ function MovePicker({ pokemonName, currentMoves, onSave, onClose }: {
           </button>
         </div>
       </div>
+      {sheetMove && <MoveSheet move={sheetMove} onClose={() => setSheetMove(null)} />}
     </div>,
     document.body
   );
