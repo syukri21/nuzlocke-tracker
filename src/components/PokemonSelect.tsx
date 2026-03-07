@@ -112,9 +112,16 @@ export const spriteCache: Record<string, string> = {}; // Keep for backward comp
 // PokeAPI regional form convention: {name}-{region} (e.g. electrode-hisui, vulpix-alola)
 // but our data uses the prefix style: hisuian-electrode, alolan-vulpix, etc.
 // Normalize a raw name string for PokeAPI lookups:
-// strips non-alphanumeric chars, collapses/trims hyphens.
+// translates gender symbols to -male/-female, strips other non-alphanumeric chars,
+// collapses and trims hyphens.
 const normalizeName = (name: string) =>
-  name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/-$/, '');
+  name
+    .replace(/[♂\u2642]/g, '-male')
+    .replace(/[♀\u2640]/g, '-female')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/-$/, '');
 
 export const formatSpecialNames = (name: string) => {
   // True irregulars that don't follow any predictable pattern
@@ -140,7 +147,6 @@ export const formatSpecialNames = (name: string) => {
     'minior':             'minior-red-meteor',
     'toxtricity':         'toxtricity-amped',
     'indeedee':           'indeedee-male',
-    'basculegion':        'basculegion-male',
     // Lycanroc forms (our data uses adjective-first ordering)
     'dusk-lycanroc':      'lycanroc-dusk',
     'midnight-lycanroc':  'lycanroc-midnight',
@@ -167,14 +173,22 @@ export const formatSpecialNames = (name: string) => {
 // Species endpoint uses base species (no form suffix), e.g. aegislash-shield → aegislash.
 const toSpeciesName = (formattedName: string): string => {
   const explicit: Record<string, string> = {
-    'lycanroc-dusk':     'lycanroc',
-    'lycanroc-midnight': 'lycanroc',
-    'lycanroc-midday':   'lycanroc',
-    'aegislash-shield':  'aegislash',
-    'aegislash-blade':   'aegislash',
-    'minior-red-meteor': 'minior',
-    'wishiwashi-solo':   'wishiwashi',
-    'zygarde-50':        'zygarde',
+    'lycanroc-dusk':       'lycanroc',
+    'lycanroc-midnight':   'lycanroc',
+    'lycanroc-midday':     'lycanroc',
+    'aegislash-shield':    'aegislash',
+    'aegislash-blade':     'aegislash',
+    'minior-red-meteor':   'minior',
+    'wishiwashi-solo':     'wishiwashi',
+    'zygarde-50':          'zygarde',
+    'pyroar-male':         'pyroar',
+    'pyroar-female':       'pyroar',
+    'basculegion-male':    'basculegion',
+    'basculegion-female':  'basculegion',
+    'indeedee-male':       'indeedee',
+    'indeedee-female':     'indeedee',
+    'meowstic-male':       'meowstic',
+    'meowstic-female':     'meowstic',
   };
   if (explicit[formattedName]) return explicit[formattedName];
   // Strip regional suffixes (marowak-alola → marowak, electrode-hisui → electrode)
