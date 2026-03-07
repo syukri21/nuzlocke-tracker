@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { cn } from '@/lib/utils';
 import { X, Sparkles, Skull } from 'lucide-react';
@@ -6,7 +6,8 @@ import { Encounter } from '../types';
 import { cap, getTypeMatchups, ALL_TYPES, TYPE_BG } from '../constants/gameConstants';
 import { TypeIcon } from './TypeIcon';
 import { Pokeball } from './Pokeball';
-import { pokemonDataCache, spriteCache } from './PokemonSelect';
+import { pokemonDataCache, spriteCache, fetchPokemonMoves, fetchMoveDetail, moveDetailCache, prefetchMoveDetails, MoveDetail } from './PokemonSelect';
+import moveTypesJson from '../data/move-types.json';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -26,6 +27,7 @@ interface TeamBuilderProps {
   onEvolve: (locName: string) => void;
   onMarkFainted: (locName: string) => void;
   onOpenDetail: (locName: string) => void;
+  onSetMoves: (locName: string, moves: string[]) => void;
   evolvingLocation: string | null;
 }
 
@@ -189,6 +191,205 @@ function BoxPickerModal({ boxLocations, encounters, onPick, onClose }: BoxPicker
   );
 }
 
+// ── Move picker modal ─────────────────────────────────────────────────────────
+
+// Normalize move-types.json keys (e.g. "Acid Armor" → "acid-armor") to match PokeAPI move names
+// Normalize move-types.json keys (e.g. "Acid Armor" → "acid-armor") to match PokeAPI move names
+const moveTypes: Record<string, string> = Object.fromEntries(
+  Object.entries(moveTypesJson as Record<string, string>).map(([k, v]) => [
+    k.toLowerCase().replace(/\s+/g, '-'),
+    v,
+  ])
+);
+
+const DC_LABEL: Record<string, string> = { physical: 'Phys', special: 'Spec', status: 'Stat' };
+const DC_COLOR: Record<string, string> = { physical: '#C03028', special: '#6890F0', status: '#705898' };
+
+function useMoveDetail(moveName: string) {
+  const key = moveName.toLowerCase().replace(/\s+/g, '-');
+  const [detail, setDetail] = useState<MoveDetail | null>(() => moveDetailCache[key] ?? null);
+  useEffect(() => {
+    if (!detail) fetchMoveDetail(moveName).then(d => { if (d) setDetail(d); });
+  }, [key]);
+  return detail;
+}
+
+function MoveRow({ move, isSelected, isFull, onToggle }: {
+  move: string;
+  isSelected: boolean;
+  isFull: boolean;
+  onToggle: () => void;
+}) {
+  const detail = useMoveDetail(move);
+  const type = detail?.type ?? (moveTypes[move.toLowerCase()] ?? 'normal');
+
+  return (
+    <button
+      onClick={onToggle}
+      disabled={isFull}
+      className={cn(
+        'w-full flex items-center gap-2 rounded-xl px-3 py-2 transition-all text-left border',
+        isSelected
+          ? 'bg-white/10 border-white/20'
+          : isFull
+            ? 'opacity-30 border-transparent cursor-not-allowed bg-transparent'
+            : 'bg-[#212121] border-white/5 hover:bg-[#2a2a2a] active:scale-[0.98]'
+      )}
+    >
+      {/* Type icon */}
+      <span className="inline-flex items-center justify-center w-5 h-5 rounded-md flex-shrink-0" style={{ backgroundColor: TYPE_BG[type] || '#9099A1' }}>
+        <img src={`${import.meta.env.BASE_URL}type-icons/${type}.svg`} alt={type} className="w-3.5 h-3.5 object-contain" />
+      </span>
+
+      {/* Name */}
+      <span className="text-[11px] font-bold text-white flex-1 truncate">{cap(move)}</span>
+
+      {/* Details */}
+      {detail ? (
+        <div className="flex items-center gap-1.5 flex-shrink-0">
+          <span className="text-[8px] font-bold px-1 py-0.5 rounded" style={{ backgroundColor: `${DC_COLOR[detail.damageClass]}30`, color: DC_COLOR[detail.damageClass] }}>
+            {DC_LABEL[detail.damageClass]}
+          </span>
+          {detail.power !== null && (
+            <span className="text-[9px] font-black text-white/70 w-7 text-right">{detail.power}</span>
+          )}
+          {detail.accuracy !== null && (
+            <span className="text-[9px] text-gray-500 w-7 text-right">{detail.accuracy}%</span>
+          )}
+        </div>
+      ) : (
+        <div className="w-4 h-4 rounded-full bg-white/5 animate-pulse flex-shrink-0" />
+      )}
+
+      {isSelected && <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 flex-shrink-0" />}
+    </button>
+  );
+}
+
+function MovePicker({ pokemonName, currentMoves, onSave, onClose }: {
+  pokemonName: string;
+  currentMoves: string[];
+  onSave: (moves: string[]) => void;
+  onClose: () => void;
+}) {
+  const [available, setAvailable] = useState<string[] | null>(null);
+  const [selected, setSelected] = useState<string[]>(currentMoves);
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    fetchPokemonMoves(pokemonName).then(setAvailable);
+  }, [pokemonName]);
+
+  const filtered = (available ?? []).filter(m =>
+    m.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const toggle = (move: string) => {
+    setSelected(prev =>
+      prev.includes(move) ? prev.filter(m => m !== move) : prev.length < 4 ? [...prev, move] : prev
+    );
+  };
+
+  return createPortal(
+    <div className="fixed inset-0 z-[300] flex items-end justify-center">
+      <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full max-w-[400px] bg-[#1a1a1a] rounded-t-3xl border-t border-white/10 shadow-2xl max-h-[85vh] flex flex-col">
+        {/* Header */}
+        <div className="flex-shrink-0 px-5 pt-3 pb-3 border-b border-white/5">
+          <div className="flex justify-center mb-3">
+            <div className="w-10 h-1 bg-white/20 rounded-full" />
+          </div>
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <div className="text-sm font-black text-white">Choose Moves</div>
+              <div className="text-[10px] text-gray-500 mt-0.5">{cap(pokemonName)} · {selected.length}/4 selected</div>
+            </div>
+            <button onClick={onClose} className="p-1.5 rounded-full bg-white/10 hover:bg-white/20 transition-colors">
+              <X className="h-4 w-4 text-gray-400" />
+            </button>
+          </div>
+          {/* Selected slots */}
+          <div className="grid grid-cols-2 gap-1.5 mb-3">
+            {Array.from({ length: 4 }).map((_, i) => {
+              const move = selected[i];
+              const detail = move ? (moveDetailCache[move.toLowerCase()] ?? null) : null;
+              const type = detail?.type ?? (move ? (moveTypes[move.toLowerCase()] ?? 'normal') : null);
+              return (
+                <div
+                  key={i}
+                  className={cn(
+                    'flex items-center gap-1.5 rounded-lg px-2 py-1.5 border min-h-[30px]',
+                    move ? 'border-white/10 bg-black/30' : 'border-dashed border-white/10'
+                  )}
+                  style={move && type ? { borderColor: `${TYPE_BG[type] || '#9099A1'}60` } : {}}
+                >
+                  {move && type && (
+                    <span className="inline-flex items-center justify-center w-3.5 h-3.5 rounded-sm flex-shrink-0" style={{ backgroundColor: TYPE_BG[type] || '#9099A1' }}>
+                      <img src={`${import.meta.env.BASE_URL}type-icons/${type}.svg`} alt={type} className="w-2.5 h-2.5 object-contain" />
+                    </span>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className={cn('text-[10px] font-bold truncate leading-none', move ? 'text-white' : 'text-gray-700')}>
+                      {move ? cap(move) : `Slot ${i + 1}`}
+                    </div>
+                    {detail && (
+                      <div className="flex items-center gap-1 mt-0.5">
+                        <span className="text-[7px] font-bold" style={{ color: DC_COLOR[detail.damageClass] }}>{DC_LABEL[detail.damageClass]}</span>
+                        {detail.power !== null && <span className="text-[7px] text-gray-500">{detail.power} pw</span>}
+                      </div>
+                    )}
+                  </div>
+                  {move && (
+                    <button onClick={() => toggle(move)} className="flex-shrink-0 text-gray-600 hover:text-red-400 transition-colors">
+                      <X className="w-2.5 h-2.5" />
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+          {/* Search */}
+          <input
+            type="text"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search moves…"
+            className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder-gray-600 outline-none focus:border-white/20"
+          />
+        </div>
+
+        {/* Move list */}
+        <div className="flex-1 overflow-y-auto py-2 px-3 space-y-1">
+          {available === null ? (
+            <div className="text-center py-8 text-[10px] text-gray-600">Loading moves…</div>
+          ) : filtered.length === 0 ? (
+            <div className="text-center py-8 text-[10px] text-gray-600">No moves found</div>
+          ) : filtered.map(move => (
+            <MoveRow
+              key={move}
+              move={move}
+              isSelected={selected.includes(move)}
+              isFull={selected.length >= 4 && !selected.includes(move)}
+              onToggle={() => toggle(move)}
+            />
+          ))}
+        </div>
+
+        {/* Save */}
+        <div className="flex-shrink-0 px-4 py-3 border-t border-white/5">
+          <button
+            onClick={() => { onSave(selected); onClose(); }}
+            className="w-full py-2.5 rounded-xl bg-cyan-600/80 hover:bg-cyan-600 text-white text-xs font-black transition-colors"
+          >
+            Save Moves
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 // ── Empty slot (clickable) ────────────────────────────────────────────────────
 
 function EmptySlot({ onClick }: { onClick: () => void }) {
@@ -213,14 +414,16 @@ function EmptySlot({ onClick }: { onClick: () => void }) {
 
 // ── Member card ───────────────────────────────────────────────────────────────
 
-function MemberCard({ member, onRemove, onEvolve, onMarkFainted, onOpenDetail, isEvolving }: {
+function MemberCard({ member, onRemove, onEvolve, onMarkFainted, onOpenDetail, onSetMoves, isEvolving }: {
   member: PartyMember;
   onRemove: () => void;
   onEvolve: () => void;
   onMarkFainted: () => void;
   onOpenDetail: () => void;
+  onSetMoves: (moves: string[]) => void;
   isEvolving: boolean;
 }) {
+  const [movePickerOpen, setMovePickerOpen] = useState(false);
   const { enc, locName } = member;
   const data   = pokemonDataCache[enc.pokemonName?.toLowerCase() ?? ''];
   const sprite = enc.pokemonName ? spriteCache[enc.pokemonName.toLowerCase()] : undefined;
@@ -291,6 +494,40 @@ function MemberCard({ member, onRemove, onEvolve, onMarkFainted, onOpenDetail, i
 
       <div className="text-[7px] text-gray-700 truncate mt-1 mb-2">{locName}</div>
 
+      {/* Moves — click to open picker */}
+      <div className="grid grid-cols-2 gap-1 mb-2 cursor-pointer" onClick={(e) => { e.stopPropagation(); setMovePickerOpen(true); }}>
+        {Array.from({ length: 4 }).map((_, i) => {
+          const move = enc.moves?.[i];
+          const detail = move ? (moveDetailCache[move.toLowerCase()] ?? null) : null;
+          const type = detail?.type ?? (move ? (moveTypes[move.toLowerCase()] ?? 'normal') : null);
+          const color = type ? (TYPE_BG[type] || '#9099A1') : null;
+          return (
+            <div
+              key={i}
+              className={cn('flex items-center rounded overflow-hidden min-h-[22px]', move ? 'bg-black/30 border' : 'border border-dashed border-white/8')}
+              style={move && color ? { borderColor: `${color}80`, boxShadow: `0 0 6px ${color}50` } : {}}
+            >
+              {move && type && color ? (
+                <>
+                  <span className="inline-flex items-center justify-center w-5 h-full flex-shrink-0 py-1" style={{ backgroundColor: color }}>
+                    <img src={`${import.meta.env.BASE_URL}type-icons/${type}.svg`} alt={type} className="w-2.5 h-2.5 object-contain" />
+                  </span>
+                  <span className="text-[8px] text-gray-300 font-bold truncate flex-1 px-1">{cap(move)}</span>
+                  <span className="text-[6px] font-bold px-1 flex-shrink-0 leading-none self-center" style={{ color: DC_COLOR[detail?.damageClass ?? 'status'] }}>
+                    {DC_LABEL[detail?.damageClass ?? 'status']}
+                  </span>
+                  {detail?.power !== null && detail?.power !== undefined && (
+                    <span className="text-[7px] font-black text-white/60 pr-1 flex-shrink-0">{detail.power}</span>
+                  )}
+                </>
+              ) : (
+                <span className="text-[8px] text-gray-700 px-1.5">—</span>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
       {/* Action buttons */}
       <div className="grid grid-cols-2 gap-1.5" onClick={(e) => e.stopPropagation()}>
         <button
@@ -308,6 +545,15 @@ function MemberCard({ member, onRemove, onEvolve, onMarkFainted, onOpenDetail, i
           <span className="text-[8px] font-bold">Dead</span>
         </button>
       </div>
+
+      {movePickerOpen && enc.pokemonName && (
+        <MovePicker
+          pokemonName={enc.pokemonName}
+          currentMoves={enc.moves ?? []}
+          onSave={onSetMoves}
+          onClose={() => setMovePickerOpen(false)}
+        />
+      )}
     </div>
   );
 }
@@ -431,12 +677,18 @@ function CoverageMatrix({ members }: { members: PartyMember[] }) {
 
 // ── Main component ────────────────────────────────────────────────────────────
 
-export function TeamBuilder({ partyLocations, boxLocations, encounters, onMoveToParty, onMoveToBox, onEvolve, onMarkFainted, onOpenDetail, evolvingLocation }: TeamBuilderProps) {
+export function TeamBuilder({ partyLocations, boxLocations, encounters, onMoveToParty, onMoveToBox, onEvolve, onMarkFainted, onOpenDetail, onSetMoves, evolvingLocation }: TeamBuilderProps) {
   const [pickerOpen, setPickerOpen] = useState(false);
 
   const members: PartyMember[] = partyLocations
     .map(locName => ({ locName, enc: encounters[locName] }))
     .filter(m => m.enc?.pokemonName) as PartyMember[];
+
+  // Prefetch move details for all selected moves on mount and whenever party changes
+  useEffect(() => {
+    const allMoves = members.flatMap(m => m.enc.moves ?? []);
+    if (allMoves.length > 0) prefetchMoveDetails(allMoves);
+  }, [partyLocations, encounters]);
 
   const partyFull = members.length >= 6;
 
@@ -459,6 +711,7 @@ export function TeamBuilder({ partyLocations, boxLocations, encounters, onMoveTo
                 onEvolve={() => onEvolve(members[i].locName)}
                 onMarkFainted={() => onMarkFainted(members[i].locName)}
                 onOpenDetail={() => onOpenDetail(members[i].locName)}
+                onSetMoves={(moves) => onSetMoves(members[i].locName, moves)}
                 isEvolving={evolvingLocation === members[i].locName}
               />
             : <EmptySlot key={`empty-${i}`} onClick={() => !partyFull && setPickerOpen(true)} />

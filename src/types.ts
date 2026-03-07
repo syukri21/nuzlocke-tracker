@@ -9,6 +9,7 @@ export interface Encounter {
   killer?: string;
   isPartyMember: boolean;
   caughtAt?: number;
+  moves?: string[];
 }
 
 export interface EncounterOption {

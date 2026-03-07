@@ -227,6 +227,7 @@ export default function App() {
         abilities: data.abilities.map((a: any) => a.ability.name.replace(/-/g, ' ')),
         height: data.height,
         weight: data.weight,
+        moves: enc.moves,
       });
     } catch {
       const cached = pokemonDataCache[(state.encounters[locName]?.pokemonName || '').toLowerCase()];
@@ -824,6 +825,7 @@ export default function App() {
               onEvolve={handleEvolveWithEffect}
               onMarkFainted={markFainted}
               onOpenDetail={openPokemonDetail}
+              onSetMoves={(locName, moves) => updateEncounter(locName, { moves })}
               evolvingLocation={evolvingLocation}
             />
           )}

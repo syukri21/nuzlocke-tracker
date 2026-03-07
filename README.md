@@ -68,13 +68,17 @@ Install it on Android or iOS from your browser — no app store needed.
 ### 🔍 Detail Modal
 - Sprite + types + base stats
 - Type matchups: Super Weak · Weak · Resist · Super Resist · Immune
-- Boss Pokémon show their actual moves with type-colored pills
-- **Compare vs Boss** — pick a boss and see how effective each of their moves is against your Pokémon
+- **Moves** — shows selected moves with type icon, damage class (Phys/Spec/Stat), power, accuracy
+- **Move coverage** — under each move, type icons show effectiveness (4× 2× ½× ¼× 0×) with neon glow badges
+- **Compare vs Boss** — pick a boss, navigate its team one Pokémon at a time with prev/next, shows your moves vs boss and boss moves vs you with full move details fetched from PokéAPI and cached to localStorage
 
 ### 👥 Team Builder
 - Party grid with type coverage matrix
 - Tap any party card to open the full detail sheet
 - Responsive type coverage on small screens
+- **Moves** — tap the move slots on a party card to open a move picker; fetches all learnable moves from PokéAPI, searchable, shows damage class + power + accuracy, up to 4 moves selectable
+- Move details cached to localStorage (`lazarus_move_detail_cache`) — no re-fetching on reload
+- Move slots display type icon, damage class, and power with neon border matching move type color
 
 ---
 

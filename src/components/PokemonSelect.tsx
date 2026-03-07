@@ -22,6 +22,52 @@ export interface PokemonData {
 }
 export const pokemonDataCache: Record<string, PokemonData> = {};
 export const evolutionLineCache: Record<string, string[]> = {};
+export const movesCache: Record<string, string[]> = {};
+
+export interface MoveDetail {
+  type: string;
+  damageClass: 'physical' | 'special' | 'status';
+  power: number | null;
+  accuracy: number | null;
+  pp: number | null;
+}
+
+const MOVE_DETAIL_LS_KEY = 'lazarus_move_detail_cache';
+
+// Initialise from localStorage so cached details survive page reloads
+export const moveDetailCache: Record<string, MoveDetail> = (() => {
+  try {
+    const saved = localStorage.getItem(MOVE_DETAIL_LS_KEY);
+    if (saved) return JSON.parse(saved) as Record<string, MoveDetail>;
+  } catch { /* ignore */ }
+  return {};
+})();
+
+export const fetchMoveDetail = async (moveName: string): Promise<MoveDetail | null> => {
+  const key = moveName.toLowerCase().replace(/\s+/g, '-');
+  if (moveDetailCache[key]) return moveDetailCache[key];
+  try {
+    const res = await fetch(`https://pokeapi.co/api/v2/move/${key}`);
+    if (res.ok) {
+      const data = await res.json();
+      const detail: MoveDetail = {
+        type: data.type.name,
+        damageClass: data.damage_class.name,
+        power: data.power,
+        accuracy: data.accuracy,
+        pp: data.pp,
+      };
+      moveDetailCache[key] = detail;
+      try { localStorage.setItem(MOVE_DETAIL_LS_KEY, JSON.stringify(moveDetailCache)); } catch { /* ignore */ }
+      return detail;
+    }
+  } catch { /* ignore */ }
+  return null;
+};
+
+export const prefetchMoveDetails = (moves: string[]): void => {
+  moves.forEach(m => { if (!moveDetailCache[m.toLowerCase().replace(/\s+/g, '-')]) fetchMoveDetail(m); });
+};
 export const spriteCache: Record<string, string> = {}; // Keep for backward compatibility if needed
 
 // Helper to handle edge cases in API names.
@@ -52,6 +98,22 @@ export const formatSpecialNames = (name: string) => {
   }
 
   return name;
+};
+
+export const fetchPokemonMoves = async (name: string): Promise<string[]> => {
+  const key = name.toLowerCase();
+  if (movesCache[key]) return movesCache[key];
+  try {
+    const formattedName = formatSpecialNames(key.replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'));
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${formattedName}`);
+    if (res.ok) {
+      const data = await res.json();
+      const moves: string[] = data.moves.map((m: any) => m.move.name as string);
+      movesCache[key] = moves;
+      return moves;
+    }
+  } catch { /* ignore */ }
+  return [];
 };
 
 export const fetchPokemonData = async (name: string): Promise<PokemonData | null> => {
