@@ -67,16 +67,32 @@ export default function App() {
   // ── Init ──────────────────────────────────────────────────────────────────
 
   useEffect(() => {
-    initPokemonCache().then(() => {
+    initPokemonCache().then(async () => {
       setCacheReady(true);
+
+      // Collect all unique boss pokemon names
+      const allBossPokemon = Array.from(
+        new Set(gameData.bosses.flatMap(boss => boss.pokemon.map(p => p.name)))
+      );
+
+      // Populate from cache first for instant display
       const sprites: Record<string, string> = {};
-      gameData.bosses.forEach(boss => {
-        boss.pokemon.forEach(p => {
-          const cached = pokemonDataCache[p.name.toLowerCase()];
-          if (cached?.sprite) sprites[p.name] = cached.sprite;
-        });
+      allBossPokemon.forEach(name => {
+        const cached = pokemonDataCache[name.toLowerCase()];
+        if (cached?.sprite) sprites[name] = cached.sprite;
       });
-      setBossSprites(sprites);
+      setBossSprites({ ...sprites });
+
+      // Fetch missing ones from PokeAPI
+      const missing = allBossPokemon.filter(name => !sprites[name]);
+      await Promise.all(
+        missing.map(async name => {
+          const data = await fetchPokemonData(name);
+          if (data?.sprite) {
+            setBossSprites(prev => ({ ...prev, [name]: data.sprite }));
+          }
+        })
+      );
     });
   }, []);
 
