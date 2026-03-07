@@ -69,7 +69,7 @@ export interface MoveDetail {
   description?: string;
 }
 
-const MOVE_DETAIL_LS_KEY = 'lazarus_move_detail_cache';
+const MOVE_DETAIL_LS_KEY = 'lazarus_move_detail_cache_v2';
 
 // Initialise from localStorage so cached details survive page reloads
 export const moveDetailCache: Record<string, MoveDetail> = (() => {
@@ -97,7 +97,7 @@ export const fetchMoveDetail = async (moveName: string): Promise<MoveDetail | nu
         power: data.power,
         accuracy: data.accuracy,
         pp: data.pp,
-        description: en?.short_effect ?? '',
+        description: en?.effect ?? en?.short_effect ?? '',
       };
       moveDetailCache[key] = detail;
       try { localStorage.setItem(MOVE_DETAIL_LS_KEY, JSON.stringify(moveDetailCache)); } catch { /* ignore */ }
