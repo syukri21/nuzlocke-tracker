@@ -24,6 +24,42 @@ export const pokemonDataCache: Record<string, PokemonData> = {};
 export const evolutionLineCache: Record<string, string[]> = {};
 export const movesCache: Record<string, string[]> = {};
 
+export interface AbilityDetail {
+  name: string;
+  shortEffect: string;
+  effect: string;
+}
+
+const ABILITY_LS_KEY = 'lazarus_ability_cache';
+export const abilityCache: Record<string, AbilityDetail> = (() => {
+  try {
+    const saved = localStorage.getItem(ABILITY_LS_KEY);
+    if (saved) return JSON.parse(saved) as Record<string, AbilityDetail>;
+  } catch { /* ignore */ }
+  return {};
+})();
+
+export const fetchAbilityDetail = async (name: string): Promise<AbilityDetail | null> => {
+  const key = name.toLowerCase().replace(/\s+/g, '-');
+  if (abilityCache[key]) return abilityCache[key];
+  try {
+    const res = await fetch(`https://pokeapi.co/api/v2/ability/${key}`);
+    if (res.ok) {
+      const data = await res.json();
+      const en = data.effect_entries.find((e: any) => e.language.name === 'en');
+      const detail: AbilityDetail = {
+        name: data.name,
+        shortEffect: en?.short_effect ?? '',
+        effect: en?.effect ?? '',
+      };
+      abilityCache[key] = detail;
+      try { localStorage.setItem(ABILITY_LS_KEY, JSON.stringify(abilityCache)); } catch { /* ignore */ }
+      return detail;
+    }
+  } catch { /* ignore */ }
+  return null;
+};
+
 export interface MoveDetail {
   type: string;
   damageClass: 'physical' | 'special' | 'status';
@@ -46,8 +82,10 @@ export const moveDetailCache: Record<string, MoveDetail> = (() => {
 export const fetchMoveDetail = async (moveName: string): Promise<MoveDetail | null> => {
   const key = moveName.toLowerCase().replace(/\s+/g, '-');
   if (moveDetailCache[key]) return moveDetailCache[key];
+  // Strip apostrophes/backticks for PokeAPI URL (e.g. "king's-shield" → "kings-shield")
+  const apiKey = key.replace(/[`']/g, '');
   try {
-    const res = await fetch(`https://pokeapi.co/api/v2/move/${key}`);
+    const res = await fetch(`https://pokeapi.co/api/v2/move/${apiKey}`);
     if (res.ok) {
       const data = await res.json();
       const detail: MoveDetail = {
@@ -82,6 +120,22 @@ export const formatSpecialNames = (name: string) => {
     'paldean-tauros':   'tauros-paldea-combat-breed',
     'mimikyu':          'mimikyu-disguised',
     'flabebe':          'flabebe',
+    'aegislash':        'aegislash-shield',
+    'wormadam':         'wormadam-plant',
+    'shaymin':          'shaymin-land',
+    'giratina':         'giratina-altered',
+    'tornadus':         'tornadus-incarnate',
+    'thundurus':        'thundurus-incarnate',
+    'landorus':         'landorus-incarnate',
+    'keldeo':           'keldeo-ordinary',
+    'meloetta':         'meloetta-aria',
+    'meowstic':         'meowstic-male',
+    'zygarde':          'zygarde-50',
+    'wishiwashi':       'wishiwashi-solo',
+    'minior':           'minior-red-meteor',
+    'toxtricity':       'toxtricity-amped',
+    'indeedee':         'indeedee-male',
+    'basculegion':      'basculegion-male',
   };
 
   if (specialCases[name]) return specialCases[name];
