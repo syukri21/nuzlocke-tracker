@@ -13,8 +13,9 @@ import { EncounterRow } from './components/EncounterRow';
 import { BoxGridItem } from './components/BoxGridItem';
 import { DetailModal } from './components/DetailModal';
 import { TeamBuilder } from './components/TeamBuilder';
-import { STAT_NAME_MAP } from './constants/gameConstants';
+import { STAT_NAME_MAP, cap } from './constants/gameConstants';
 import { DetailData, Encounter } from './types';
+import pokemonCacheJson from './data/pokemon-cache.json';
 
 // ── App ───────────────────────────────────────────────────────────────────────
 
@@ -46,13 +47,18 @@ export default function App() {
   const [newRouteName, setNewRouteName] = useState('');
   const [addingPokemonToRoute, setAddingPokemonToRoute] = useState<string | null>(null);
 
-  // All unique Pokémon from all locations, sorted alphabetically (for free-form picker)
+  // All Pokémon available as route picker options:
+  // 1. Every Pokémon from every route (preserves proper names + ids)
+  // 2. Every Pokémon from pokemon-cache (fills in evolutions, starters, gifts)
   const allPokemon = (() => {
     const map = new Map<string, { name: string; id: number }>();
     gameData.locations.forEach(loc => {
       (Object.values(loc.encounters).flat() as { name: string; id: number }[]).forEach(p => {
-        if (p?.name && !map.has(p.name)) map.set(p.name, p);
+        if (p?.name) map.set(p.name.toLowerCase(), p);
       });
+    });
+    Object.keys(pokemonCacheJson).forEach((key, i) => {
+      if (!map.has(key)) map.set(key, { name: cap(key), id: 9000 + i });
     });
     return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
   })();
