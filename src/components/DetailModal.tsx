@@ -6,7 +6,7 @@ import { STAT_COLORS, TYPE_BG, getTypeMatchups, ALL_TYPES, cap } from '../consta
 import { TypeIcon } from './TypeIcon';
 import { spriteCache, pokemonDataCache } from './PokemonSelect';
 import moveTypesJson from '../data/move-types.json';
-import { moveDetailCache, fetchMoveDetail, MoveDetail } from './PokemonSelect';
+import { moveDetailCache, fetchMoveDetail, MoveDetail, abilityCache, fetchAbilityDetail, AbilityDetail } from './PokemonSelect';
 
 // Normalize keys to lowercase-hyphenated to match PokeAPI move names
 const moveTypes: Record<string, string> = Object.fromEntries(
@@ -63,6 +63,27 @@ function CompareMoveRow({ move, defTypes }: { move: string; defTypes: string[] }
           <span className={cn('text-[8px] font-black px-1.5 py-0.5 rounded', eff.cls)}>{eff.label}</span>
         )}
       </div>
+    </div>
+  );
+}
+
+// ── Ability badge ─────────────────────────────────────────────────────────────
+
+function AbilityBadge({ ability }: { ability: string }) {
+  const key = ability.toLowerCase().replace(/\s+/g, '-');
+  const [detail, setDetail] = useState<AbilityDetail | null>(() => abilityCache[key] ?? null);
+  useEffect(() => {
+    if (!detail) fetchAbilityDetail(ability).then(d => { if (d) setDetail(d); });
+  }, [key]);
+
+  return (
+    <div className="bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+      <div className="text-[10px] font-black text-white capitalize mb-1">{ability}</div>
+      {detail ? (
+        <div className="text-[9px] text-gray-400 leading-relaxed">{detail.shortEffect}</div>
+      ) : (
+        <div className="h-3 w-3/4 bg-white/5 rounded animate-pulse" />
+      )}
     </div>
   );
 }
@@ -156,29 +177,34 @@ interface DetailModalProps {
   loading: boolean;
   onClose: () => void;
   bosses?: BossEntry[];
+  partyDetails?: DetailData[];
 }
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export function DetailModal({ detail, loading, onClose, bosses }: DetailModalProps) {
+export function DetailModal({ detail, loading, onClose, bosses, partyDetails }: DetailModalProps) {
   const [view, setView] = useState<'detail' | 'bossPicker' | 'compare'>('detail');
   const [selectedBoss, setSelectedBoss] = useState<BossEntry | null>(null);
   const [bossSearch, setBossSearch] = useState('');
   const [bossPokeIndex, setBossPokeIndex] = useState(0);
+  const [partyPokeIndex, setPartyPokeIndex] = useState(0);
 
-  // Reset compare state when the detail changes
+  // Reset compare state when the detail changes; sync party index to the opened Pokemon
   useEffect(() => {
     setView('detail');
     setSelectedBoss(null);
     setBossSearch('');
+    const idx = partyDetails?.findIndex(p => p.name === detail?.name) ?? -1;
+    setPartyPokeIndex(idx >= 0 ? idx : 0);
   }, [detail?.name]);
 
-  // Prefetch all moves for the selected boss team + your moves when entering compare
+  // Prefetch all moves for the selected boss team + all party moves when entering compare
   useEffect(() => {
     if (!selectedBoss) return;
-    const allMoves = [...new Set(selectedBoss.pokemon.flatMap(bp => bp.moves).concat(detail?.moves ?? []))];
+    const partyMoves = partyDetails?.flatMap(pd => pd.moves ?? []) ?? detail?.moves ?? [];
+    const allMoves = [...new Set(selectedBoss.pokemon.flatMap(bp => bp.moves).concat(partyMoves))];
     allMoves.forEach(m => { if (!moveDetailCache[m.toLowerCase()]) fetchMoveDetail(m); });
-  }, [selectedBoss, detail?.moves]);
+  }, [selectedBoss, detail?.moves, partyDetails]);
 
   if (!detail && !loading) return null;
 
@@ -291,15 +317,21 @@ export function DetailModal({ detail, loading, onClose, bosses }: DetailModalPro
     const bossData = pokemonDataCache[p.name.toLowerCase()];
     const bossTypes = bossData?.types ?? [];
 
-    // Sort boss moves by effectiveness descending
+    // Active user pokemon (navigable via party prev/next)
+    const hasParty = partyDetails && partyDetails.length > 0;
+    const safePartyIdx = hasParty ? Math.min(partyPokeIndex, partyDetails!.length - 1) : 0;
+    const activePoke = hasParty ? partyDetails![safePartyIdx] : detail;
+    const userDefTypes = activePoke.types;
+
+    // Sort boss moves by effectiveness vs the active user pokemon
     const sortedBossMoves = [...p.moves].sort((a, b) => {
       const typeA = moveDetailCache[a.toLowerCase()]?.type ?? moveTypes[a.toLowerCase()] ?? 'normal';
       const typeB = moveDetailCache[b.toLowerCase()]?.type ?? moveTypes[b.toLowerCase()] ?? 'normal';
-      return getMoveEffect(typeB, defTypes).mult - getMoveEffect(typeA, defTypes).mult;
+      return getMoveEffect(typeB, userDefTypes).mult - getMoveEffect(typeA, userDefTypes).mult;
     });
 
-    // Sort your moves by effectiveness descending
-    const sortedYourMoves = [...(detail.moves ?? [])].sort((a, b) => {
+    // Sort your moves by effectiveness vs boss
+    const sortedYourMoves = [...(activePoke.moves ?? [])].sort((a, b) => {
       const typeA = moveDetailCache[a.toLowerCase()]?.type ?? moveTypes[a.toLowerCase()] ?? 'normal';
       const typeB = moveDetailCache[b.toLowerCase()]?.type ?? moveTypes[b.toLowerCase()] ?? 'normal';
       return getMoveEffect(typeB, bossTypes).mult - getMoveEffect(typeA, bossTypes).mult;
@@ -381,11 +413,64 @@ export function DetailModal({ detail, loading, onClose, bosses }: DetailModalPro
               </div>
             </div>
 
+            {/* User Pokémon navigator */}
+            {hasParty && (
+              <div className="px-4 py-3 border-b border-white/5">
+                <div className="text-[8px] font-black text-gray-600 uppercase tracking-wider mb-2">Your Pokémon</div>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setPartyPokeIndex(i => Math.max(0, i - 1))}
+                    disabled={safePartyIdx === 0}
+                    className="p-1.5 rounded-full bg-white/8 hover:bg-white/15 disabled:opacity-20 transition-colors flex-shrink-0"
+                  >
+                    <ChevronLeft className="h-4 w-4 text-gray-400" />
+                  </button>
+
+                  <div className="flex-1 flex items-center gap-3 min-w-0">
+                    <div className="w-12 h-12 flex-shrink-0 rounded-xl bg-black/30 flex items-center justify-center">
+                      {activePoke.sprite
+                        ? <img src={activePoke.sprite} alt={activePoke.name} className="w-11 h-11 object-contain" />
+                        : <span className="text-[9px] text-gray-600 font-bold">{activePoke.name.substring(0, 3)}</span>
+                      }
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-sm font-black text-white truncate">
+                        {cap(activePoke.nickname || activePoke.name)}
+                      </div>
+                      {activePoke.nickname && (
+                        <div className="text-[9px] text-gray-500 truncate">{cap(activePoke.name)}</div>
+                      )}
+                      {userDefTypes.length > 0 && (
+                        <div className="flex gap-0.5 mt-0.5">
+                          {userDefTypes.map(t => <TypeIcon key={t} type={t} size="sm" label={false} />)}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => setPartyPokeIndex(i => Math.min(partyDetails!.length - 1, i + 1))}
+                    disabled={safePartyIdx === partyDetails!.length - 1}
+                    className="p-1.5 rounded-full bg-white/8 hover:bg-white/15 disabled:opacity-20 transition-colors flex-shrink-0"
+                  >
+                    <ChevronLeft className="h-4 w-4 text-gray-400 rotate-180" />
+                  </button>
+                </div>
+
+                {/* Dot indicators */}
+                <div className="flex justify-center gap-1 mt-2">
+                  {partyDetails!.map((_, i) => (
+                    <button key={i} onClick={() => setPartyPokeIndex(i)} className={cn('w-1.5 h-1.5 rounded-full transition-colors', i === safePartyIdx ? 'bg-white/60' : 'bg-white/15')} />
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div className="px-4 py-3 space-y-4">
               {/* Your moves → boss Pokémon */}
               <div>
                 <div className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-1.5">
-                  Your moves vs {cap(p.name)} {bossTypes.length === 0 && <span className="text-gray-700 normal-case font-normal">(type unknown)</span>}
+                  {cap(activePoke.nickname || activePoke.name)}'s moves vs {cap(p.name)} {bossTypes.length === 0 && <span className="text-gray-700 normal-case font-normal">(type unknown)</span>}
                 </div>
                 {sortedYourMoves.length === 0 ? (
                   <div className="text-[9px] text-gray-700 italic">No moves set — assign moves on the Team page</div>
@@ -399,10 +484,10 @@ export function DetailModal({ detail, loading, onClose, bosses }: DetailModalPro
               {/* Boss moves → your Pokémon */}
               <div>
                 <div className="text-[9px] font-black text-gray-500 uppercase tracking-wider mb-1.5">
-                  {cap(p.name)}'s moves vs {cap(detail.nickname || detail.name)}
+                  {cap(p.name)}'s moves vs {cap(activePoke.nickname || activePoke.name)}
                 </div>
                 <div className="space-y-1">
-                  {sortedBossMoves.map(move => <CompareMoveRow key={move} move={move} defTypes={defTypes} />)}
+                  {sortedBossMoves.map(move => <CompareMoveRow key={move} move={move} defTypes={userDefTypes} />)}
                 </div>
               </div>
             </div>
@@ -521,11 +606,9 @@ export function DetailModal({ detail, loading, onClose, bosses }: DetailModalPro
               {detail.abilities.length > 0 && (
                 <div className="mb-5">
                   <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">Abilities</div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="space-y-2">
                     {detail.abilities.map(ability => (
-                      <span key={ability} className="px-2.5 py-1 bg-white/5 border border-white/10 rounded-lg text-[10px] font-semibold text-gray-300 capitalize">
-                        {ability}
-                      </span>
+                      <AbilityBadge key={ability} ability={ability} />
                     ))}
                   </div>
                 </div>

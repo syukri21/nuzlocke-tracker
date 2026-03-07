@@ -946,6 +946,24 @@ export default function App() {
           loading={detailLoading}
           onClose={() => setDetailPokemon(null)}
           bosses={gameData.bosses}
+          partyDetails={state.party
+            .map(loc => {
+              const enc = state.encounters[loc];
+              if (!enc?.pokemonName) return null;
+              const cached = pokemonDataCache[enc.pokemonName.toLowerCase()];
+              return {
+                name: enc.pokemonName,
+                nickname: enc.nickname,
+                sprite: cached?.sprite || spriteCache[enc.pokemonName.toLowerCase()] || '',
+                types: cached?.types || [],
+                stats: cached?.stats || [],
+                abilities: [],
+                height: 0,
+                weight: 0,
+                moves: enc.moves,
+              } as DetailData;
+            })
+            .filter((d): d is DetailData => d !== null)}
         />
 
         {/* ── Bottom nav ───────────────────────────────────────────────────── */}
