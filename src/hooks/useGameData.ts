@@ -4,16 +4,18 @@ import bossesData from '../data/bosses.json';
 
 const GAME_DATA_KEY = 'lazarus_game_data';
 
-type Location = typeof locationsData.locations[number];
 type Boss = typeof bossesData.bosses[number];
 
+export interface EncounterEntry { name: string; id: number; locStr?: string; }
+export interface GameLocation { name: string; encounters: Record<string, EncounterEntry[]>; }
+
 interface GameData {
-  locations: Location[];
+  locations: GameLocation[];
   bosses: Boss[];
 }
 
 const DEFAULT_GAME_DATA: GameData = {
-  locations: locationsData.locations,
+  locations: locationsData.locations as GameLocation[],
   bosses: bossesData.bosses as Boss[],
 };
 
@@ -72,5 +74,33 @@ export function useGameData() {
     setIsCustom(false);
   };
 
-  return { gameData, isCustom, importGameData, exportGameData, resetGameData };
+  const addLocation = (name: string, insertAfterName: string | null) => {
+    setGameData(prev => {
+      const newLoc = { name, encounters: { Wild: [] as { name: string; id: number; locStr?: string }[] } };
+      const newLocations = [...prev.locations];
+      const idx = insertAfterName ? newLocations.findIndex(l => l.name === insertAfterName) : -1;
+      if (idx >= 0) newLocations.splice(idx + 1, 0, newLoc);
+      else newLocations.push(newLoc);
+      const updated = { ...prev, locations: newLocations };
+      localStorage.setItem(GAME_DATA_KEY, JSON.stringify(updated));
+      return updated;
+    });
+    setIsCustom(true);
+  };
+
+  const addPokemonToLocation = (locName: string, pokemon: { name: string; id: number }) => {
+    setGameData(prev => {
+      const newLocations = prev.locations.map(loc => {
+        if (loc.name !== locName) return loc;
+        const existing = (loc.encounters['Wild'] || []) as { name: string; id: number }[];
+        if (existing.some(p => p.name === pokemon.name)) return loc;
+        return { ...loc, encounters: { ...loc.encounters, Wild: [...existing, pokemon] } };
+      });
+      const updated = { ...prev, locations: newLocations };
+      localStorage.setItem(GAME_DATA_KEY, JSON.stringify(updated));
+      return updated;
+    });
+  };
+
+  return { gameData, isCustom, importGameData, exportGameData, resetGameData, addLocation, addPokemonToLocation };
 }

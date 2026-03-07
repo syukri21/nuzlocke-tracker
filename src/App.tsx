@@ -20,7 +20,7 @@ import { DetailData, Encounter } from './types';
 
 export default function App() {
   const { state, updateEncounter, markFainted, resetRun, moveToParty, moveToBox } = useRunStore();
-  const { gameData, isCustom, importGameData, exportGameData, resetGameData } = useGameData();
+  const { gameData, isCustom, importGameData, exportGameData, resetGameData, addLocation, addPokemonToLocation } = useGameData();
 
   const [activeMainTab, setActiveMainTab] = useState<'Game' | 'Team' | 'Box' | 'Grave'>('Game');
   const [activeSubTab, setActiveSubTab] = useState<'Nuzlocke' | 'Routes' | 'Bosses' | 'Upcoming'>('Nuzlocke');
@@ -40,6 +40,22 @@ export default function App() {
   const [bossSprites, setBossSprites] = useState<Record<string, string>>({});
   const [, forceUpdate] = useState(0);
   const [evolvingLocation, setEvolvingLocation] = useState<string | null>(null);
+
+  // ── Routes tab state ───────────────────────────────────────────────────────
+  const [insertAfterRoute, setInsertAfterRoute] = useState<string | null>(null);
+  const [newRouteName, setNewRouteName] = useState('');
+  const [addingPokemonToRoute, setAddingPokemonToRoute] = useState<string | null>(null);
+
+  // All unique Pokémon from all locations, sorted alphabetically (for free-form picker)
+  const allPokemon = (() => {
+    const map = new Map<string, { name: string; id: number }>();
+    gameData.locations.forEach(loc => {
+      (Object.values(loc.encounters).flat() as { name: string; id: number }[]).forEach(p => {
+        if (p?.name && !map.has(p.name)) map.set(p.name, p);
+      });
+    });
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  })();
 
   // ── Init ──────────────────────────────────────────────────────────────────
 
@@ -512,37 +528,123 @@ export default function App() {
 
               {/* ── Routes sub-tab ───────────────────────────────────────── */}
               {activeSubTab === 'Routes' && (
-                <div className="space-y-3">
+                <div className="space-y-1.5">
                   {gameData.locations
                     .filter(loc => {
                       const q = searchTerm.toLowerCase();
                       if (!q) return true;
                       if (loc.name.toLowerCase().includes(q)) return true;
-                      return Object.values(loc.encounters).flat().some(p => p.name.toLowerCase().includes(q));
+                      return Object.values(loc.encounters).flat().some((p: any) => p.name?.toLowerCase().includes(q));
                     })
                     .map(loc => (
-                      <div key={loc.name} className="bg-[#212121] rounded-xl border border-white/5 p-3 shadow-sm">
-                        <div className="text-xs font-bold text-white mb-2">{loc.name}</div>
-                        <div className="space-y-1.5">
-                          {Object.entries(loc.encounters).map(([method, pokemon]) => (
-                            <div key={method} className="flex items-start gap-2">
-                              <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wide min-w-[60px] pt-0.5">
-                                {method.replace('Fishing ', '').replace('(', '').replace(')', '')}
-                              </span>
-                              <div className="flex flex-wrap gap-1">
-                                {pokemon.map((p: { name: string; id: number }) => {
-                                  const sprite = spriteCache[p.name.toLowerCase()];
-                                  return (
-                                    <div key={p.name} className="flex items-center gap-1 bg-black/30 rounded-md px-1.5 py-0.5">
-                                      {sprite && <img src={sprite} alt={p.name} className="w-4 h-4 object-contain" />}
-                                      <span className="text-[9px] text-gray-300">{p.name}</span>
-                                    </div>
-                                  );
-                                })}
+                      <div key={loc.name}>
+                        {/* Route card */}
+                        <div className="bg-[#212121] rounded-xl border border-white/5 p-3 shadow-sm">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="text-xs font-bold text-white">{loc.name}</div>
+                            <button
+                              onClick={() => {
+                                setAddingPokemonToRoute(r => r === loc.name ? null : loc.name);
+                              }}
+                              className="text-[8px] font-black text-cyan-500 hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 px-2 py-0.5 rounded transition-colors"
+                            >
+                              + Pokémon
+                            </button>
+                          </div>
+
+                          {/* Existing Pokémon by method */}
+                          <div className="space-y-1.5">
+                            {Object.entries(loc.encounters).map(([method, pokemon]) => (
+                              <div key={method} className="flex items-start gap-2">
+                                <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wide min-w-[60px] pt-0.5">
+                                  {method.replace('Fishing ', '').replace('(', '').replace(')', '')}
+                                </span>
+                                <div className="flex flex-wrap gap-1">
+                                  {(pokemon as { name: string; id: number }[]).map(p => {
+                                    const sprite = spriteCache[p.name.toLowerCase()];
+                                    return (
+                                      <div key={p.name} className="flex items-center gap-1 bg-black/30 rounded-md px-1.5 py-0.5">
+                                        {sprite && <img src={sprite} alt={p.name} className="w-4 h-4 object-contain" />}
+                                        <span className="text-[9px] text-gray-300">{p.name}</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
                               </div>
+                            ))}
+                          </div>
+
+                          {/* Add Pokémon picker (free-form, all Pokémon) */}
+                          {addingPokemonToRoute === loc.name && (
+                            <div className="mt-2 pt-2 border-t border-white/5">
+                              <PokemonSelect
+                                value=""
+                                options={allPokemon}
+                                onChange={name => {
+                                  const p = allPokemon.find(p => p.name === name);
+                                  if (p) { addPokemonToLocation(loc.name, p); }
+                                  setAddingPokemonToRoute(null);
+                                }}
+                              />
                             </div>
-                          ))}
+                          )}
+
+                          {/* Add route below button */}
+                          <button
+                            onClick={() => {
+                              setInsertAfterRoute(loc.name);
+                              setNewRouteName('');
+                              setAddingPokemonToRoute(null);
+                            }}
+                            className="w-full mt-2.5 py-1 text-[8px] font-black text-gray-600 hover:text-gray-400 border border-dashed border-white/5 hover:border-white/10 rounded-lg transition-colors"
+                          >
+                            + Add route below
+                          </button>
                         </div>
+
+                        {/* Inline new route form */}
+                        {insertAfterRoute === loc.name && (
+                          <div className="mt-1.5 bg-[#1a1a1a] border border-cyan-500/30 rounded-xl p-3 space-y-2">
+                            <div className="text-[10px] font-black text-cyan-400 uppercase tracking-widest">New Route</div>
+                            <div className="flex gap-2">
+                              <input
+                                autoFocus
+                                type="text"
+                                placeholder="Route / location name…"
+                                value={newRouteName}
+                                onChange={e => setNewRouteName(e.target.value)}
+                                onKeyDown={e => {
+                                  if (e.key === 'Enter' && newRouteName.trim()) {
+                                    addLocation(newRouteName.trim(), insertAfterRoute);
+                                    setInsertAfterRoute(null);
+                                    setNewRouteName('');
+                                  }
+                                  if (e.key === 'Escape') { setInsertAfterRoute(null); setNewRouteName(''); }
+                                }}
+                                className="flex-1 bg-black/40 border border-white/10 rounded-lg px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-cyan-500/50"
+                              />
+                              <button
+                                disabled={!newRouteName.trim()}
+                                onClick={() => {
+                                  if (newRouteName.trim()) {
+                                    addLocation(newRouteName.trim(), insertAfterRoute);
+                                    setInsertAfterRoute(null);
+                                    setNewRouteName('');
+                                  }
+                                }}
+                                className="px-3 py-1.5 rounded-lg bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-400 text-xs font-black disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                              >
+                                Add
+                              </button>
+                              <button
+                                onClick={() => { setInsertAfterRoute(null); setNewRouteName(''); }}
+                                className="px-2 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-gray-500 text-xs transition-colors"
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ))}
                 </div>
