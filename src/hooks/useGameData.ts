@@ -14,10 +14,10 @@ interface GameData {
   bosses: Boss[];
 }
 
-const DEFAULT_GAME_DATA: GameData = {
+const getDefaultGameData = (): GameData => ({
   locations: locationsData.locations as GameLocation[],
   bosses: bossesData.bosses as Boss[],
-};
+});
 
 export function useGameData() {
   const [gameData, setGameData] = useState<GameData>(() => {
@@ -30,7 +30,7 @@ export function useGameData() {
         }
       } catch { /* fall through */ }
     }
-    return DEFAULT_GAME_DATA;
+    return getDefaultGameData();
   });
 
   const [isCustom, setIsCustom] = useState(() => !!localStorage.getItem(GAME_DATA_KEY));
@@ -70,7 +70,7 @@ export function useGameData() {
 
   const resetGameData = () => {
     localStorage.removeItem(GAME_DATA_KEY);
-    setGameData(DEFAULT_GAME_DATA);
+    setGameData(getDefaultGameData());
     setIsCustom(false);
   };
 
@@ -100,7 +100,31 @@ export function useGameData() {
       localStorage.setItem(GAME_DATA_KEY, JSON.stringify(updated));
       return updated;
     });
+    setIsCustom(true);
   };
 
-  return { gameData, isCustom, importGameData, exportGameData, resetGameData, addLocation, addPokemonToLocation };
+  const setAllPokemonForLocation = (locName: string, pokemon: { name: string; id: number }[]) => {
+    setGameData(prev => {
+      const newLocations = prev.locations.map(loc => {
+        if (loc.name !== locName) return loc;
+        return { ...loc, encounters: { ...loc.encounters, Wild: pokemon } };
+      });
+      const updated = { ...prev, locations: newLocations };
+      localStorage.setItem(GAME_DATA_KEY, JSON.stringify(updated));
+      return updated;
+    });
+    setIsCustom(true);
+  };
+
+  const removeLocation = (locName: string) => {
+    setGameData(prev => {
+      const newLocations = prev.locations.filter(loc => loc.name !== locName);
+      const updated = { ...prev, locations: newLocations };
+      localStorage.setItem(GAME_DATA_KEY, JSON.stringify(updated));
+      return updated;
+    });
+    setIsCustom(true);
+  };
+
+  return { gameData, isCustom, importGameData, exportGameData, resetGameData, addLocation, addPokemonToLocation, setAllPokemonForLocation, removeLocation };
 }

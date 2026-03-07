@@ -21,7 +21,7 @@ import pokemonCacheJson from './data/pokemon-cache.json';
 
 export default function App() {
   const { state, updateEncounter, markFainted, resetRun, moveToParty, moveToBox } = useRunStore();
-  const { gameData, isCustom, importGameData, exportGameData, resetGameData, addLocation, addPokemonToLocation } = useGameData();
+  const { gameData, isCustom, importGameData, exportGameData, resetGameData, addLocation, addPokemonToLocation, setAllPokemonForLocation, removeLocation } = useGameData();
 
   const [activeMainTab, setActiveMainTab] = useState<'Game' | 'Team' | 'Box' | 'Grave'>('Game');
   const [activeSubTab, setActiveSubTab] = useState<'Nuzlocke' | 'Routes' | 'Bosses' | 'Upcoming'>('Nuzlocke');
@@ -46,6 +46,7 @@ export default function App() {
   const [insertAfterRoute, setInsertAfterRoute] = useState<string | null>(null);
   const [newRouteName, setNewRouteName] = useState('');
   const [addingPokemonToRoute, setAddingPokemonToRoute] = useState<string | null>(null);
+  const [confirmRemoveRoute, setConfirmRemoveRoute] = useState<string | null>(null);
 
   // All Pokémon available as route picker options:
   // 1. Every Pokémon from every route (preserves proper names + ids)
@@ -388,7 +389,7 @@ export default function App() {
               </div>
               <h2 className="text-base font-black text-white text-center mb-2">Reset Run?</h2>
               <p className="text-xs text-gray-400 text-center mb-6 leading-relaxed">
-                This will permanently delete all your encounter data, boxed Pokémon, and graveyard. This cannot be undone.
+                This will permanently delete all your encounter data, boxed Pokémon, graveyard, and reset all route changes back to default. This cannot be undone.
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <button
@@ -398,7 +399,7 @@ export default function App() {
                   Cancel
                 </button>
                 <button
-                  onClick={() => { resetRun(); setShowResetConfirm(false); }}
+                  onClick={() => { resetRun(); resetGameData(); setShowResetConfirm(false); }}
                   className="py-2.5 rounded-xl bg-red-500/20 border border-red-500/30 text-sm font-bold text-red-400 hover:bg-red-500/30 transition-colors cursor-pointer"
                 >
                   Reset
@@ -548,41 +549,69 @@ export default function App() {
                         <div className="bg-[#212121] rounded-xl border border-white/5 p-3 shadow-sm">
                           <div className="flex items-center justify-between mb-2">
                             <div className="text-xs font-bold text-white">{loc.name}</div>
-                            <button
-                              onClick={() => {
-                                setAddingPokemonToRoute(r => r === loc.name ? null : loc.name);
-                              }}
-                              className="text-[8px] font-black text-cyan-500 hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 px-2 py-0.5 rounded transition-colors"
-                            >
-                              + Pokémon
-                            </button>
+                            <div className="flex items-center gap-1.5">
+                              <button
+                                onClick={() => {
+                                  setAddingPokemonToRoute(r => r === loc.name ? null : loc.name);
+                                }}
+                                className="text-[8px] font-black text-cyan-500 hover:text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 px-2 py-0.5 rounded transition-colors"
+                              >
+                                + Pokémon
+                              </button>
+                              <button
+                                onClick={() => setConfirmRemoveRoute(loc.name)}
+                                className="text-[8px] font-black text-red-500 hover:text-red-300 bg-red-500/10 hover:bg-red-500/20 px-2 py-0.5 rounded transition-colors"
+                              >
+                                Remove
+                              </button>
+                            </div>
                           </div>
 
                           {/* Existing Pokémon by method */}
                           <div className="space-y-1.5">
-                            {Object.entries(loc.encounters).map(([method, pokemon]) => (
-                              <div key={method} className="flex items-start gap-2">
-                                <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wide min-w-[60px] pt-0.5">
-                                  {method.replace('Fishing ', '').replace('(', '').replace(')', '')}
-                                </span>
-                                <div className="flex flex-wrap gap-1">
-                                  {(pokemon as { name: string; id: number }[]).map(p => {
-                                    const sprite = spriteCache[p.name.toLowerCase()];
-                                    return (
-                                      <div key={p.name} className="flex items-center gap-1 bg-black/30 rounded-md px-1.5 py-0.5">
-                                        {sprite && <img src={sprite} alt={p.name} className="w-4 h-4 object-contain" />}
-                                        <span className="text-[9px] text-gray-300">{p.name}</span>
+                            {Object.entries(loc.encounters).map(([method, pokemon]) => {
+                              const pList = pokemon as { name: string; id: number }[];
+                              const isAll = pList.length >= allPokemon.length && allPokemon.length > 0;
+                              return (
+                                <div key={method} className="flex items-start gap-2">
+                                  <span className="text-[9px] font-bold text-gray-500 uppercase tracking-wide min-w-[60px] pt-0.5">
+                                    {method.replace('Fishing ', '').replace('(', '').replace(')', '')}
+                                  </span>
+                                  <div className="flex flex-wrap gap-1">
+                                    {isAll ? (
+                                      <div className="flex items-center gap-1.5 bg-indigo-900/40 border border-indigo-500/30 rounded-md px-2 py-0.5">
+                                        <Pokeball className="w-3.5 h-3.5 opacity-80" />
+                                        <span className="text-[9px] text-indigo-300 font-medium">All Pokémon available</span>
                                       </div>
-                                    );
-                                  })}
+                                    ) : (
+                                      pList.map(p => {
+                                        const sprite = spriteCache[p.name.toLowerCase()];
+                                        return (
+                                          <div key={p.name} className="flex items-center gap-1 bg-black/30 rounded-md px-1.5 py-0.5">
+                                            {sprite && <img src={sprite} alt={p.name} className="w-4 h-4 object-contain" />}
+                                            <span className="text-[9px] text-gray-300">{p.name}</span>
+                                          </div>
+                                        );
+                                      })
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
 
                           {/* Add Pokémon picker (free-form, all Pokémon) */}
                           {addingPokemonToRoute === loc.name && (
-                            <div className="mt-2 pt-2 border-t border-white/5">
+                            <div className="mt-2 pt-2 border-t border-white/5 space-y-2">
+                              <button
+                                onClick={() => {
+                                  setAllPokemonForLocation(loc.name, allPokemon);
+                                  setAddingPokemonToRoute(null);
+                                }}
+                                className="w-full text-xs py-1.5 rounded bg-indigo-600/40 hover:bg-indigo-600/60 text-indigo-200 font-medium transition-colors"
+                              >
+                                Add All ({allPokemon.length})
+                              </button>
                               <PokemonSelect
                                 value=""
                                 options={allPokemon}
@@ -859,6 +888,35 @@ export default function App() {
           )}
 
         </main>
+
+        {/* ── Remove route confirmation ────────────────────────────────────── */}
+        {confirmRemoveRoute && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <div className="bg-[#212121] border border-white/10 rounded-2xl p-5 w-full max-w-[320px] shadow-2xl">
+              <div className="text-sm font-bold text-white mb-1">Remove Route</div>
+              <div className="text-xs text-gray-400 mb-4">
+                Remove <span className="text-white font-semibold">"{confirmRemoveRoute}"</span> from the route list? This cannot be undone.
+              </div>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => setConfirmRemoveRoute(null)}
+                  className="flex-1 py-2 rounded-xl text-xs font-semibold bg-white/5 hover:bg-white/10 text-gray-300 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    removeLocation(confirmRemoveRoute);
+                    setConfirmRemoveRoute(null);
+                  }}
+                  className="flex-1 py-2 rounded-xl text-xs font-semibold bg-red-600/80 hover:bg-red-600 text-white transition-colors"
+                >
+                  Remove
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ── Detail modal ─────────────────────────────────────────────────── */}
         <DetailModal
