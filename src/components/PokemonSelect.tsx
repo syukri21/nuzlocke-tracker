@@ -111,31 +111,40 @@ export const spriteCache: Record<string, string> = {}; // Keep for backward comp
 // Helper to handle edge cases in API names.
 // PokeAPI regional form convention: {name}-{region} (e.g. electrode-hisui, vulpix-alola)
 // but our data uses the prefix style: hisuian-electrode, alolan-vulpix, etc.
+// Normalize a raw name string for PokeAPI lookups:
+// strips non-alphanumeric chars, collapses/trims hyphens.
+const normalizeName = (name: string) =>
+  name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/-$/, '');
+
 export const formatSpecialNames = (name: string) => {
   // True irregulars that don't follow any predictable pattern
   const specialCases: Record<string, string> = {
-    'farfetch-d':       'farfetchd',
-    'sirfetch-d':       'sirfetchd',
-    'basculin-white':   'basculin-white-striped',
-    'paldean-tauros':   'tauros-paldea-combat-breed',
-    'mimikyu':          'mimikyu-disguised',
-    'flabebe':          'flabebe',
-    'aegislash':        'aegislash-shield',
-    'wormadam':         'wormadam-plant',
-    'shaymin':          'shaymin-land',
-    'giratina':         'giratina-altered',
-    'tornadus':         'tornadus-incarnate',
-    'thundurus':        'thundurus-incarnate',
-    'landorus':         'landorus-incarnate',
-    'keldeo':           'keldeo-ordinary',
-    'meloetta':         'meloetta-aria',
-    'meowstic':         'meowstic-male',
-    'zygarde':          'zygarde-50',
-    'wishiwashi':       'wishiwashi-solo',
-    'minior':           'minior-red-meteor',
-    'toxtricity':       'toxtricity-amped',
-    'indeedee':         'indeedee-male',
-    'basculegion':      'basculegion-male',
+    'farfetch-d':         'farfetchd',
+    'sirfetch-d':         'sirfetchd',
+    'basculin-white':     'basculin-white-striped',
+    'paldean-tauros':     'tauros-paldea-combat-breed',
+    'mimikyu':            'mimikyu-disguised',
+    'flabebe':            'flabebe',
+    'aegislash':          'aegislash-shield',
+    'wormadam':           'wormadam-plant',
+    'shaymin':            'shaymin-land',
+    'giratina':           'giratina-altered',
+    'tornadus':           'tornadus-incarnate',
+    'thundurus':          'thundurus-incarnate',
+    'landorus':           'landorus-incarnate',
+    'keldeo':             'keldeo-ordinary',
+    'meloetta':           'meloetta-aria',
+    'meowstic':           'meowstic-male',
+    'zygarde':            'zygarde-50',
+    'wishiwashi':         'wishiwashi-solo',
+    'minior':             'minior-red-meteor',
+    'toxtricity':         'toxtricity-amped',
+    'indeedee':           'indeedee-male',
+    'basculegion':        'basculegion-male',
+    // Lycanroc forms (our data uses adjective-first ordering)
+    'dusk-lycanroc':      'lycanroc-dusk',
+    'midnight-lycanroc':  'lycanroc-midnight',
+    'midday-lycanroc':    'lycanroc-midday',
   };
 
   if (specialCases[name]) return specialCases[name];
@@ -154,11 +163,32 @@ export const formatSpecialNames = (name: string) => {
   return name;
 };
 
+// Derive the PokeAPI species name from the formatted pokemon name.
+// Species endpoint uses base species (no form suffix), e.g. aegislash-shield → aegislash.
+const toSpeciesName = (formattedName: string): string => {
+  const explicit: Record<string, string> = {
+    'lycanroc-dusk':     'lycanroc',
+    'lycanroc-midnight': 'lycanroc',
+    'lycanroc-midday':   'lycanroc',
+    'aegislash-shield':  'aegislash',
+    'aegislash-blade':   'aegislash',
+    'minior-red-meteor': 'minior',
+    'wishiwashi-solo':   'wishiwashi',
+    'zygarde-50':        'zygarde',
+  };
+  if (explicit[formattedName]) return explicit[formattedName];
+  // Strip regional suffixes (marowak-alola → marowak, electrode-hisui → electrode)
+  for (const suffix of ['-alola', '-galar', '-hisui', '-paldea']) {
+    if (formattedName.endsWith(suffix)) return formattedName.slice(0, -suffix.length);
+  }
+  return formattedName;
+};
+
 export const fetchPokemonMoves = async (name: string): Promise<string[]> => {
   const key = name.toLowerCase();
   if (movesCache[key]) return movesCache[key];
   try {
-    const formattedName = formatSpecialNames(key.replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'));
+    const formattedName = formatSpecialNames(normalizeName(key));
     const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${formattedName}`);
     if (res.ok) {
       const data = await res.json();
@@ -174,7 +204,7 @@ export const fetchPokemonData = async (name: string): Promise<PokemonData | null
   const key = name.toLowerCase();
   if (pokemonDataCache[key]) return pokemonDataCache[key];
   try {
-    const formattedName = formatSpecialNames(name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'));
+    const formattedName = formatSpecialNames(normalizeName(name));
     const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${formattedName}`);
     if (res.ok) {
       const data = await res.json();
@@ -208,7 +238,7 @@ export const fetchEvolutionLine = async (name: string): Promise<string[]> => {
   if (evolutionLineCache[name]) return evolutionLineCache[name];
 
   // Check static overrides first (regional forms / Lazarus-specific evolutions)
-  const normalizedKey = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
+  const normalizedKey = normalizeName(name);
   if (EVOLUTION_OVERRIDES[normalizedKey]) {
     const line = EVOLUTION_OVERRIDES[normalizedKey];
     evolutionLineCache[name] = line;
@@ -219,8 +249,9 @@ export const fetchEvolutionLine = async (name: string): Promise<string[]> => {
 
   try {
     const formattedName = formatSpecialNames(normalizedKey);
-    // 1. Get species data
-    const speciesRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${formattedName}`);
+    // 1. Get species data — species endpoint needs base species name (no form suffix)
+    const speciesName = toSpeciesName(formattedName);
+    const speciesRes = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${speciesName}`);
     if (!speciesRes.ok) return [name];
     const speciesData = await speciesRes.json();
 
@@ -305,7 +336,7 @@ export function PokemonSelect({ value, onChange, options }: PokemonSelectProps) 
           newSprites[name] = spriteCache[name];
         } else {
           try {
-            const formattedName = formatSpecialNames(name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-'));
+            const formattedName = formatSpecialNames(normalizeName(name));
             const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${formattedName}`);
             if (res.ok) {
               const data = await res.json();
