@@ -56,10 +56,25 @@ Install it on Android or iOS from your browser — no app store needed.
 - Ace Pokémon highlighted in gold, lead Pokémon marked in blue
 - Tap any Pokémon for full detail sheet
 
+### 🗺️ Routes Tab
+- View all 48 routes with their available Pokémon
+- **Add route** — insert a new route below any existing one
+- **Remove route** — delete a route with confirmation popup
+- **Add Pokémon** — free-form picker with every Pokémon from the cache
+- **Add All** — bulk-add all Pokémon to a route in one tap; shows a Pokéball badge instead of listing every entry
+- Route Pokémon badges show type icons with neon glow border
+- **Reset** restores all route changes back to default
+
 ### 🔍 Detail Modal
 - Sprite + types + base stats
 - Type matchups: Super Weak · Weak · Resist · Super Resist · Immune
 - Boss Pokémon show their actual moves with type-colored pills
+- **Compare vs Boss** — pick a boss and see how effective each of their moves is against your Pokémon
+
+### 👥 Team Builder
+- Party grid with type coverage matrix
+- Tap any party card to open the full detail sheet
+- Responsive type coverage on small screens
 
 ---
 

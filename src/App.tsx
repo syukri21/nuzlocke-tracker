@@ -13,7 +13,7 @@ import { EncounterRow } from './components/EncounterRow';
 import { BoxGridItem } from './components/BoxGridItem';
 import { DetailModal } from './components/DetailModal';
 import { TeamBuilder } from './components/TeamBuilder';
-import { STAT_NAME_MAP, cap } from './constants/gameConstants';
+import { STAT_NAME_MAP, cap, TYPE_BG } from './constants/gameConstants';
 import { DetailData, Encounter } from './types';
 import pokemonCacheJson from './data/pokemon-cache.json';
 
@@ -585,11 +585,15 @@ export default function App() {
                                       </div>
                                     ) : (
                                       pList.map(p => {
-                                        const sprite = spriteCache[p.name.toLowerCase()];
+                                        const types = pokemonDataCache[p.name.toLowerCase()]?.types ?? [];
                                         return (
-                                          <div key={p.name} className="flex items-center gap-1 bg-black/30 rounded-md px-1.5 py-0.5">
-                                            {sprite && <img src={sprite} alt={p.name} className="w-4 h-4 object-contain" />}
-                                            <span className="text-[9px] text-gray-300">{p.name}</span>
+                                          <div key={p.name} title={p.name} className="flex items-center bg-black/30 rounded overflow-hidden border" style={{ borderColor: `${TYPE_BG[types[0]] || '#9099A1'}80`, boxShadow: `0 0 6px ${TYPE_BG[types[0]] || '#9099A1'}60` }}>
+                                            {types.map((t, i) => (
+                                              <span key={t} className={`inline-flex items-center justify-center w-3 h-3 flex-shrink-0${i === 0 ? ' rounded-l-sm' : ''}`} style={{ backgroundColor: TYPE_BG[t] || '#9099A1' }} title={t}>
+                                                <img src={`${import.meta.env.BASE_URL}type-icons/${t}.svg`} alt={t} className="w-2 h-2 object-contain" />
+                                              </span>
+                                            ))}
+                                            <span className="px-1 text-[8px] text-gray-400 leading-none">{p.name}</span>
                                           </div>
                                         );
                                       })
